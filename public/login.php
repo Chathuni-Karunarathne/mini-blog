@@ -2,7 +2,7 @@
 require __DIR__ . '/../src/helpers/auth.php';
 $pdo = require __DIR__ . '/../src/helpers/db.php';
 
-$errors = [];     //comments
+$errors = [];     
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = trim($_POST['username_or_email'] ?? '');
