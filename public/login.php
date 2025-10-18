@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
         if ($user && password_verify($password, $user['password_hash'])) {
             loginUser($user);
-            header('Location: /mini-blog/public/dashboard.php');
+            header('Location: /mini-blog/public/posts.php');
             exit;
         } else {
             $errors[] = "Invalid credentials.";
