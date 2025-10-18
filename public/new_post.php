@@ -123,5 +123,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </form>
 </div>
+<script>
+  // simple live markdown preview using a minimal approach:
+  const textarea = document.querySelector('textarea[name="content"]');
+  if (textarea) {
+    const preview = document.createElement('div');
+    preview.innerHTML = '<h5>Preview</h5><div id="md-preview" style="border:1px solid #e3e3e3; padding:10px; background:#fff;"></div>';
+    textarea.parentNode.appendChild(preview);
+    const mdPreview = document.getElementById('md-preview');
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+    }
+
+    function simpleMarkdownToHtml(text) {
+      // very lightweight conversions — headings, bold, italic, code, line breaks
+      let s = escapeHtml(text);
+      s = s.replace(/^\s*###### (.*$)/gim, '<h6>$1</h6>');
+      s = s.replace(/^\s*##### (.*$)/gim, '<h5>$1</h5>');
+      s = s.replace(/^\s*#### (.*$)/gim, '<h4>$1</h4>');
+      s = s.replace(/^\s*### (.*$)/gim, '<h3>$1</h3>');
+      s = s.replace(/^\s*## (.*$)/gim, '<h2>$1</h2>');
+      s = s.replace(/^\s*# (.*$)/gim, '<h1>$1</h1>');
+      s = s.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+      s = s.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+      s = s.replace(/`([^`]+)`/gim, '<code>$1</code>');
+      s = s.replace(/\n/g, '<br>');
+      return s;
+    }
+
+    textarea.addEventListener('input', () => {
+      mdPreview.innerHTML = simpleMarkdownToHtml(textarea.value);
+    });
+    // initialize
+    mdPreview.innerHTML = simpleMarkdownToHtml(textarea.value);
+  }
+</script>
+
 </body>
 </html>

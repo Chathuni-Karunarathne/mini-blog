@@ -1,9 +1,20 @@
 <?php
 
-//require_once __DIR__ . '/markdown.php';  //testing purpose
+
 
 // src/helpers/auth.php
 session_start(); // ensure session is started if included directly from public files
+
+function ensureCsrfToken(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(24));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function getCsrfToken(): ?string {
+    return $_SESSION['csrf_token'] ?? null;
+}
 
 function isLoggedIn(): bool {
     return isset($_SESSION['user']);
@@ -38,4 +49,3 @@ function currentUser() {
     return $_SESSION['user'] ?? null;
 }
 
-//echo render_markdown("bye world"); //testing purpose

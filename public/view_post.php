@@ -51,11 +51,16 @@ $update->execute(['id' => $post['id']]);
         <?= render_markdown($post['content']) ?>
       </div>
 
-      <?php if (isLoggedIn() && (currentUser()['id'] ?? 0) == $post['user_id']): ?>
-        <hr>
-        <a class="btn btn-sm btn-outline-primary" href="edit_post.php?id=<?=urlencode($post['id'])?>">Edit</a>
-        <a class="btn btn-sm btn-danger" href="delete_post.php?id=<?=urlencode($post['id'])?>" onclick="return confirm('Delete this post?');">Delete</a>
-      <?php endif; ?>
+    <?php if (isLoggedIn() && (currentUser()['id'] ?? 0) == $post['user_id']): ?>
+  <hr>
+  <a class="btn btn-sm btn-outline-primary" href="edit_post.php?id=<?=urlencode($post['id'])?>">Edit</a>
+
+  <form method="post" action="delete_post.php" onsubmit="return confirm('Delete this post?');" style="display:inline">
+    <input type="hidden" name="id" value="<?=htmlspecialchars($post['id'])?>">
+    <input type="hidden" name="csrf_token" value="<?=htmlspecialchars(ensureCsrfToken())?>">
+    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+  </form>
+<?php endif; ?>
     </div>
   </div>
 </div>
