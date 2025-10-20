@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/../src/helpers/auth.php';
 $pdo = require __DIR__ . '/../src/helpers/db.php';
+require __DIR__ . '/../src/helpers/slugify.php';
 require __DIR__ . '/../src/helpers/markdown.php';
 
 $stmt = $pdo->prepare("SELECT p.*, u.username FROM blogPost p JOIN user u ON p.user_id = u.id WHERE p.status = 'published' ORDER BY p.created_at DESC");
