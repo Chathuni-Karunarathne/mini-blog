@@ -85,6 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+<?php include __DIR__ . '/../src/partials/navbar.php'; ?>
+
 <div class="container py-4">
   <a href="posts.php" class="btn btn-link">&larr; Back</a>
   <h2>New Post</h2>

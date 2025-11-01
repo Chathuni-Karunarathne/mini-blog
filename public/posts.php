@@ -16,6 +16,7 @@ $posts = $stmt->fetchAll();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
+<?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between mb-3">
     <h1>Posts</h1>
