@@ -101,9 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'])?>">
     </div>
     <div class="mb-3">
-      <label class="form-label">Excerpt (optional)</label>
-      <textarea name="excerpt" class="form-control"><?=htmlspecialchars($old['excerpt'])?></textarea>
-    </div>
+  <label class="form-label">Category / Genre</label>
+  <input name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'])?>">
+  <div class="form-text">Specify the category or genre of your post.</div>
+</div>
+
     <div class="mb-3">
       <label class="form-label">Content (Markdown)</label>
       <textarea name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'])?></textarea>
