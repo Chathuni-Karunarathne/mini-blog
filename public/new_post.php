@@ -12,7 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = trim($_POST['title'] ?? '');
     $excerpt = trim($_POST['excerpt'] ?? '');
     $content = trim($_POST['content'] ?? '');
-    $status = ($_POST['status'] ?? 'draft') === 'published' ? 'published' : 'draft';
+    $action = $_POST['action'] ?? 'draft';
+$status = ($action === 'publish') ? 'published' : 'draft';
+
 
     $old = ['title'=>$title, 'excerpt'=>$excerpt, 'content'=>$content, 'status'=>$status];
 
@@ -101,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'])?>">
     </div>
     <div class="mb-3">
-  <label class="form-label">Category / Genre</label>
+  <label class="form-label">Genre</label>
   <input name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'])?>">
   <div class="form-text">Specify the category or genre of your post.</div>
 </div>
@@ -115,16 +117,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label class="form-label">Featured Image (optional, max 2MB)</label>
       <input type="file" name="featured_image" class="form-control" accept="image/*">
     </div>
-    <div class="mb-3">
-      <label class="form-label">Status</label>
-      <select name="status" class="form-select">
-        <option value="draft" <?= $old['status']=='draft' ? 'selected':'' ?>>Draft</option>
-        <option value="published" <?= $old['status']=='published' ? 'selected':'' ?>>Published</option>
-      </select>
-    </div>
-    <div>
-      <button class="btn btn-primary">Save</button>
-    </div>
+    <div class="d-flex gap-2">
+  <button type="submit" name="action" value="draft" class="btn btn-secondary"> Save as Draft</button>
+  <button type="submit" name="action" value="publish" class="btn btn-primary"> Publish</button>
+</div>
+
   </form>
 </div>
 <script>

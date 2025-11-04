@@ -3,13 +3,79 @@ require __DIR__ . '/../src/helpers/auth.php';
 requireLogin();
 $pdo = require __DIR__ . '/../src/helpers/db.php';
 $user = currentUser();
+$errors = [];
+$success = '';
 
-// Fetch user's posts — both published and drafts
-$stmtPub = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status = 'published' ORDER BY created_at DESC");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $full_name = trim($_POST['full_name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    // --- Image upload ---
+    $profileImagePath = $user['profile_image'] ?? null;
+    if (!empty($_FILES['profile_image']) && $_FILES['profile_image']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $allowed = ['image/jpeg', 'image/png', 'image/gif'];
+        $file = $_FILES['profile_image'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $errors[] = "Error uploading profile image.";
+        } elseif ($file['size'] > (2 * 1024 * 1024)) {
+            $errors[] = "Profile image must be under 2MB.";
+        } elseif (!in_array(mime_content_type($file['tmp_name']), $allowed)) {
+            $errors[] = "Only JPG, PNG, GIF images allowed.";
+        } else {
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $safe = bin2hex(random_bytes(8)) . '.' . $ext;
+            $dest = __DIR__ . '/../uploads/profile_' . $safe;
+
+            if (!move_uploaded_file($file['tmp_name'], $dest)) {
+                $errors[] = "Failed to move uploaded profile image.";
+            } else {
+                // remove old image if exists
+                if ($profileImagePath && file_exists(__DIR__ . '/../' . $profileImagePath)) {
+                    @unlink(__DIR__ . '/../' . $profileImagePath);
+                }
+                $profileImagePath = 'uploads/profile_' . $safe;
+            }
+        }
+    }
+
+    if (empty($errors)) {
+        $params = [
+            'full_name' => $full_name,
+            'email' => $email,
+            'profile_image' => $profileImagePath,
+            'id' => $user['id'],
+        ];
+        $sql = "UPDATE user SET full_name=:full_name, email=:email, profile_image=:profile_image";
+
+        // handle password update only if entered
+        if (!empty($password)) {
+            $sql .= ", password_hash=:password_hash";
+            $params['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        $sql .= " WHERE id=:id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
+        // update session user data
+        $stmt2 = $pdo->prepare("SELECT * FROM user WHERE id=:id");
+        $stmt2->execute(['id' => $user['id']]);
+        $updatedUser = $stmt2->fetch();
+        loginUser($updatedUser);
+
+        $success = "Profile updated successfully!";
+        $user = $updatedUser;
+    }
+}
+
+// fetch posts
+$stmtPub = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status='published' ORDER BY created_at DESC");
 $stmtPub->execute(['uid' => $user['id']]);
 $published = $stmtPub->fetchAll();
 
-$stmtDraft = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status = 'draft' ORDER BY created_at DESC");
+$stmtDraft = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status='draft' ORDER BY created_at DESC");
 $stmtDraft->execute(['uid' => $user['id']]);
 $drafts = $stmtDraft->fetchAll();
 ?>
@@ -24,45 +90,89 @@ $drafts = $stmtDraft->fetchAll();
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 
 <div class="container py-5">
-  <h2 class="mb-4">Your Profile</h2>
+  <h2>Your Profile</h2>
 
-  <div class="card mb-4 p-4">
-    <p><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></p>
-    <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?></p>
-    <p><strong>Full Name:</strong> <?= htmlspecialchars($user['full_name'] ?? 'Not provided') ?></p>
+  <?php if ($errors): ?>
+    <div class="alert alert-danger"><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div>
+  <?php endif; ?>
+  <?php if ($success): ?>
+    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+  <?php endif; ?>
+
+  <div class="row">
+    <div class="col-md-4 text-center">
+      <?php
+$profileImage = !empty($user['profile_image'])
+    ? '/mini-blog/' . htmlspecialchars($user['profile_image'])
+    : '/mini-blog/public/assets/default-avatar.png';
+?>
+<img src="<?= $profileImage ?>" class="rounded-circle me-3 border" width="100" height="100" style="object-fit: cover;">
+    </div>
+
+    <div class="col-md-8">
+      <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="full_name" class="form-control" value="<?= htmlspecialchars($user['full_name'] ?? '') ?>">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">New Password (leave blank to keep current)</label>
+          <input type="password" name="password" class="form-control" placeholder="Enter new password">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Profile Image</label>
+          <input type="file" name="profile_image" class="form-control" accept="image/*">
+        </div>
+        <button class="btn btn-primary">Update Profile</button>
+      </form>
+    </div>
   </div>
 
-  <h4 class="mt-5 mb-3">Your Published Posts (<?= count($published) ?>)</h4>
+  <hr class="my-5">
+
+  <h4 class="mb-3">Published Posts (<?= count($published) ?>)</h4>
   <?php if ($published): ?>
     <?php foreach ($published as $p): ?>
       <div class="card mb-3">
         <div class="card-body">
           <h5 class="card-title"><?= htmlspecialchars($p['title']) ?></h5>
-          <p class="card-text text-muted"><?= htmlspecialchars($p['created_at']) ?></p>
           <a href="view_post.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+          <a href="edit_post.php?id=<?= urlencode($p['id']) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+          <form method="post" action="delete_post.php" style="display:inline">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($p['id']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+          </form>
         </div>
       </div>
     <?php endforeach; ?>
   <?php else: ?>
-    <div class="alert alert-info">You haven’t published any posts yet.</div>
+    <div class="alert alert-info">You have no published posts.</div>
   <?php endif; ?>
 
-  <h4 class="mt-5 mb-3">Your Drafts (<?= count($drafts) ?>)</h4>
+  <h4 class="mt-5 mb-3">Drafts (<?= count($drafts) ?>)</h4>
   <?php if ($drafts): ?>
     <?php foreach ($drafts as $d): ?>
       <div class="card mb-3 border-warning">
         <div class="card-body">
           <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
-          <p class="card-text text-muted"><?= htmlspecialchars($d['created_at']) ?></p>
-          <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-outline-warning">Edit Draft</a>
+          <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-outline-warning">Edit</a>
+          <form method="post" action="publish_post.php" style="display:inline">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+            <button type="submit" class="btn btn-sm btn-success">Publish</button>
+          </form>
         </div>
       </div>
     <?php endforeach; ?>
   <?php else: ?>
-    <div class="alert alert-secondary">No drafts saved.</div>
+    <div class="alert alert-secondary">No drafts yet.</div>
   <?php endif; ?>
 
 </div>
-
 </body>
 </html>
