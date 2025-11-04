@@ -104,9 +104,9 @@ $drafts = $stmtDraft->fetchAll();
       <?php
 $profileImage = !empty($user['profile_image'])
     ? '/mini-blog/' . htmlspecialchars($user['profile_image'])
-    : '/mini-blog/public/assets/default-avatar.png';
+    : '/mini-blog/public/assets/profile-pic.png';
 ?>
-<img src="<?= $profileImage ?>" class="rounded-circle me-3 border" width="100" height="100" style="object-fit: cover;">
+<img src="<?= $profileImage ?>" class="rounded-circle me-3 border shadow-sm" width="110" height="110" style="object-fit: cover;">
     </div>
 
     <div class="col-md-8">
