@@ -27,11 +27,6 @@ require_once __DIR__ . '/../helpers/auth.php';
       <ul class="navbar-nav">
         <?php if (isLoggedIn()): ?>
           <li class="nav-item">
-            <span class="navbar-text text-light me-3">
-              <?= htmlspecialchars(currentUser()['username'] ?? 'User') ?>
-            </span>
-          </li>
-          <li class="nav-item">
             <a class="btn btn-outline-light btn-sm" href="/mini-blog/public/logout.php">Logout</a>
           </li>
         <?php else: ?>

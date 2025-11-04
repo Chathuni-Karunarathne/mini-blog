@@ -67,16 +67,33 @@ $posts = $stmt->fetchAll();
   </div>
   <div class="bg-white p-3 rounded shadow-sm mb-4">
 
+  <?php if (isLoggedIn()): ?>
+  <h2 class="text-muted mb-4">👋 Welcome, <strong><?= htmlspecialchars(currentUser()['username']) ?></strong>!</h2>
+<?php endif; ?>
+
   <form method="get" class="row g-2 mb-4 align-items-center">
 
   <!-- Search bar with icon -->
   <div class="col-md-8">
     <div class="input-group">
-       <input type="text" name="search" class="form-control border-start-0" placeholder="Search posts by title, content, author, or category..." value="<?= htmlspecialchars($search) ?>">
-      <span class="input-group-text bg-white border-start-0">
-        🔍
-      </span>
-    </div>
+  <input 
+    type="text" 
+    name="search" 
+    class="form-control border-end-0" 
+    placeholder="Search posts by title, content, author, or category..." 
+    value="<?= htmlspecialchars($search) ?>"
+  >
+  <button 
+    type="submit" 
+    name="action" 
+    value="search" 
+    class="btn btn-outline-primary border-start-0"
+    style="border-color: #ced4da; background-color: white;"
+  >
+    🔍
+  </button>
+</div>
+
   </div>
 
   <!-- Sorting dropdown -->
