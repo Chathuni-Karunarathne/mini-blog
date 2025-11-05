@@ -183,24 +183,33 @@ $deleted = $stmt->fetchAll();
 ?>
 
 <?php if (!empty($deleted)): ?>
-  <div class="list-group">
+  <div class="row">
     <?php foreach ($deleted as $d): ?>
-      <div class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-          <strong><?= htmlspecialchars($d['title']) ?></strong>
-          <span class="text-muted">(<?= htmlspecialchars($d['status']) ?>)</span>
-        </div>
-        <div class="d-flex gap-2">
-          <form method="post" action="restore_post.php" class="d-inline">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-            <input type="hidden" name="action" value="draft">
-            <button type="submit" class="btn btn-sm btn-secondary">Restore as Draft</button>
-          </form>
-          <form method="post" action="restore_post.php" class="d-inline">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-            <input type="hidden" name="action" value="publish">
-            <button type="submit" class="btn btn-sm btn-primary">Restore as Published</button>
-          </form>
+      <div class="col-md-6 mb-3">
+        <div class="card border-danger" style="background-color: #f8d7da;">
+          <div class="card-body">
+            <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
+            <p class="card-text text-muted mb-2">
+              <?= htmlspecialchars($d['excerpt'] ?: 'No category') ?><br>
+              <small>Deleted on: <?= htmlspecialchars($d['updated_at'] ?? $d['created_at']) ?></small>
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <form method="post" action="restore_post.php" class="d-inline">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                <input type="hidden" name="action" value="publish">
+                <button type="submit" class="btn btn-sm btn-success">Restore as Published</button>
+              </form>
+              <form method="post" action="restore_post.php" class="d-inline">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                <input type="hidden" name="action" value="draft">
+                <button type="submit" class="btn btn-sm btn-secondary">Restore as Draft</button>
+              </form>
+              <form method="post" action="permanent_delete.php" class="d-inline" onsubmit="return confirm('Permanently delete this post?');">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete Permanently</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     <?php endforeach; ?>
@@ -208,6 +217,7 @@ $deleted = $stmt->fetchAll();
 <?php else: ?>
   <p class="text-muted">No deleted posts.</p>
 <?php endif; ?>
+
 
 </body>
 </html>
