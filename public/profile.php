@@ -174,5 +174,40 @@ $profileImage = !empty($user['profile_image'])
   <?php endif; ?>
 
 </div>
+<hr>
+<h4 class="mt-4 text-danger">🗑️ Deleted Posts</h4>
+<?php
+$stmt = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND is_deleted = 1 ORDER BY updated_at DESC");
+$stmt->execute(['uid' => currentUser()['id']]);
+$deleted = $stmt->fetchAll();
+?>
+
+<?php if (!empty($deleted)): ?>
+  <div class="list-group">
+    <?php foreach ($deleted as $d): ?>
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong><?= htmlspecialchars($d['title']) ?></strong>
+          <span class="text-muted">(<?= htmlspecialchars($d['status']) ?>)</span>
+        </div>
+        <div class="d-flex gap-2">
+          <form method="post" action="restore_post.php" class="d-inline">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+            <input type="hidden" name="action" value="draft">
+            <button type="submit" class="btn btn-sm btn-secondary">Restore as Draft</button>
+          </form>
+          <form method="post" action="restore_post.php" class="d-inline">
+            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+            <input type="hidden" name="action" value="publish">
+            <button type="submit" class="btn btn-sm btn-primary">Restore as Published</button>
+          </form>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+<?php else: ?>
+  <p class="text-muted">No deleted posts.</p>
+<?php endif; ?>
+
 </body>
 </html>

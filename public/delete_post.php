@@ -34,8 +34,10 @@ if ($post['featured_image'] && file_exists(__DIR__ . '/../' . $post['featured_im
     @unlink(__DIR__ . '/../' . $post['featured_image']);
 }
 
-$del = $pdo->prepare("DELETE FROM blogPost WHERE id = :id");
+// soft delete 
+$del = $pdo->prepare("UPDATE blogPost SET is_deleted = 1 WHERE id = :id");
 $del->execute(['id'=>$id]);
+
 
 header('Location: posts.php');
 exit;

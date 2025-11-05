@@ -8,10 +8,8 @@ $search = trim($_GET['search'] ?? '');
 $sort = $_GET['sort'] ?? 'desc'; // newest first by default
 
 // Base SQL
-$sql = "SELECT p.*, u.username 
-        FROM blogPost p 
-        JOIN user u ON p.user_id = u.id 
-        WHERE p.status = 'published'";
+$sql = "SELECT p.*, u.username FROM blogPost p JOIN user u ON p.user_id = u.id WHERE p.status = 'published' AND p.is_deleted = 0";
+
 
 // If a search term is entered, match it against title, content, author, or category
 $params = [];
