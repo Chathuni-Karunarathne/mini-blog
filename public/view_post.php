@@ -40,7 +40,7 @@ $update->execute(['id' => $post['id']]);
 <div class="container py-4">
   <a class="btn btn-link" href="posts.php">&larr; Back to posts</a>
 
-  <div class="card">
+  <div class="card" style="background-color: <?= htmlspecialchars($post['bg_color'] ?? '#ffffff') ?>;">
     <?php if ($post['featured_image']): ?>
       <img src="/mini-blog/<?=htmlspecialchars($post['featured_image'])?>" class="card-img-top" alt="">
     <?php endif; ?>

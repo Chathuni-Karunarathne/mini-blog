@@ -109,7 +109,7 @@ $posts = $stmt->fetchAll();
 </div>
 
   <?php foreach ($posts as $p): ?>
-    <div class="card mb-3">
+    <div class="card mb-3" style="background: <?= htmlspecialchars($p['bg_color'] ?? '#ffffff') ?>;">
       <div class="row g-0">
         <?php if ($p['featured_image']): ?>
         <div class="col-md-3">

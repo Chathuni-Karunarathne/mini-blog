@@ -29,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $content = trim($_POST['content'] ?? '');
     $action = $_POST['action'] ?? 'draft';
 $status = ($action === 'publish') ? 'published' : 'draft';
+$bg_color = $_POST['bg_color'] ?? '#ffffff';
+
 
     if ($title === '' || strlen($title) < 3) $errors[] = "Title required (3+ chars).";
     if ($content === '' || strlen($content) < 10) $errors[] = "Content required (10+ chars).";
@@ -76,13 +78,14 @@ $status = ($action === 'publish') ? 'published' : 'draft';
             }
         }
 
-        $stmt = $pdo->prepare("UPDATE blogPost SET title=:title, slug=:slug, content=:content, excerpt=:excerpt, featured_image=:fi, status=:status, updated_at=NOW() WHERE id=:id");
+        $stmt = $pdo->prepare("UPDATE blogPost SET title=:title, slug=:slug, content=:content, excerpt=:excerpt, featured_image=:fi, bg_color = :bg, status=:status, updated_at=NOW() WHERE id=:id");
         $stmt->execute([
             'title'=>$title,
             'slug'=>$slug,
             'content'=>$content,
             'excerpt'=>$excerpt ?: null,
             'fi'=>$featuredImagePath,
+            'bg' => $bg_color,
             'status'=>$status,
             'id'=>$post['id']
         ]);
@@ -92,9 +95,15 @@ $status = ($action === 'publish') ? 'published' : 'draft';
     }
 
     // re-fill $old for the form
-    $old = ['title'=>$title, 'excerpt'=>$excerpt, 'content'=>$content, 'status'=>$status, 'featured_image'=>$featuredImagePath];
-}
+    $old = [
+  'title' => $post['title'],
+  'excerpt' => $post['excerpt'],
+  'content' => $post['content'],
+  'status' => $post['status'],
+  'bg_color' => $post['bg_color'] ?? '#ffffff'
+];
 
+}
 ?>
 <!doctype html>
 <html>
@@ -102,6 +111,10 @@ $status = ($action === 'publish') ? 'published' : 'draft';
   <meta charset="utf-8">
   <title>Edit Post — Mini Blog</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- EasyMDE Markdown Editor -->
+<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+<script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
@@ -127,9 +140,10 @@ $status = ($action === 'publish') ? 'published' : 'draft';
 
 
     <div class="mb-3">
-      <label class="form-label">Content (Markdown)</label>
-      <textarea name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'] ?? '')?></textarea>
-    </div>
+  <label class="form-label">Content</label>
+  <textarea id="content-editor" name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'])?></textarea>
+</div>
+
 
     <div class="mb-3">
       <label class="form-label">Featured Image (leave empty to keep current)</label>
@@ -139,6 +153,37 @@ $status = ($action === 'publish') ? 'published' : 'draft';
       <input type="file" name="featured_image" class="form-control" accept="image/*">
     </div>
 
+    <div class="mb-3">
+  <label class="form-label d-block">Background Color</label>
+  <div class="d-flex flex-wrap gap-2">
+    <?php
+    $colors = ['#ffffff', '#f8f9fa', '#fff3cd', '#e0f7fa', '#e8f5e9', '#fce4ec', '#e3f2fd', '#f3e5f5'];
+    foreach ($colors as $c):
+    ?>
+      <span 
+        class="color-circle <?= (($old['bg_color'] ?? '#ffffff') === $c) ? 'selected' : '' ?>" 
+        data-color="<?= $c ?>" 
+        style="display:inline-block; width:30px; height:30px; border-radius:50%; background:<?= $c ?>; border:2px solid <?= (($old['bg_color'] ?? '#ffffff') === $c) ? '#007bff' : '#ccc' ?>; cursor:pointer;">
+      </span>
+    <?php endforeach; ?>
+    <input type="hidden" name="bg_color" id="bg_color" value="<?= htmlspecialchars($old['bg_color'] ?? '#ffffff') ?>">
+  </div>
+  <div class="form-text">Click a color circle to choose your background.</div>
+</div>
+
+<script>
+document.querySelectorAll('.color-circle').forEach(circle => {
+  circle.addEventListener('click', () => {
+    document.querySelectorAll('.color-circle').forEach(c => c.style.border = '2px solid #ccc');
+    circle.style.border = '2px solid #007bff';
+    document.getElementById('bg_color').value = circle.dataset.color;
+  });
+});
+</script>
+
+
+
+
     <div class="d-flex gap-2">
   <button type="submit" name="action" value="draft" class="btn btn-secondary"> Save as Draft</button>
   <button type="submit" name="action" value="publish" class="btn btn-primary"> Publish</button>
@@ -146,41 +191,31 @@ $status = ($action === 'publish') ? 'published' : 'draft';
 
   </form>
 </div>
+
+
 <script>
-  // simple live markdown preview using a minimal approach:
-  const textarea = document.querySelector('textarea[name="content"]');
-  if (textarea) {
-    const preview = document.createElement('div');
-    preview.innerHTML = '<h5>Preview</h5><div id="md-preview" style="border:1px solid #e3e3e3; padding:10px; background:#fff;"></div>';
-    textarea.parentNode.appendChild(preview);
-    const mdPreview = document.getElementById('md-preview');
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+document.addEventListener("DOMContentLoaded", function() {
+  const easyMDE = new EasyMDE({
+    element: document.getElementById("content-editor"),
+    spellChecker: false,
+    autosave: {
+      enabled: false
+    },
+    placeholder: "Write your post content here...",
+    status: false,
+    toolbar: [
+      "bold", "italic", "heading", "|",
+      "quote", "unordered-list", "ordered-list", "|",
+      "link", "image", "code", "|",
+      "preview", "side-by-side", "fullscreen", "|",
+      "guide"
+    ],
+    renderingConfig: {
+      singleLineBreaks: false,
+      codeSyntaxHighlighting: true
     }
-
-    function simpleMarkdownToHtml(text) {
-      // very lightweight conversions — headings, bold, italic, code, line breaks
-      let s = escapeHtml(text);
-      s = s.replace(/^\s*###### (.*$)/gim, '<h6>$1</h6>');
-      s = s.replace(/^\s*##### (.*$)/gim, '<h5>$1</h5>');
-      s = s.replace(/^\s*#### (.*$)/gim, '<h4>$1</h4>');
-      s = s.replace(/^\s*### (.*$)/gim, '<h3>$1</h3>');
-      s = s.replace(/^\s*## (.*$)/gim, '<h2>$1</h2>');
-      s = s.replace(/^\s*# (.*$)/gim, '<h1>$1</h1>');
-      s = s.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
-      s = s.replace(/\*(.*?)\*/gim, '<em>$1</em>');
-      s = s.replace(/`([^`]+)`/gim, '<code>$1</code>');
-      s = s.replace(/\n/g, '<br>');
-      return s;
-    }
-
-    textarea.addEventListener('input', () => {
-      mdPreview.innerHTML = simpleMarkdownToHtml(textarea.value);
-    });
-    // initialize
-    mdPreview.innerHTML = simpleMarkdownToHtml(textarea.value);
-  }
+  });
+});
 </script>
 
 </body>
