@@ -78,6 +78,13 @@ $published = $stmtPub->fetchAll();
 $stmtDraft = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status='draft' ORDER BY created_at DESC");
 $stmtDraft->execute(['uid' => $user['id']]);
 $drafts = $stmtDraft->fetchAll();
+
+// fetch deleted posts (soft-deleted)
+$stmtDel = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND is_deleted = 1 ORDER BY updated_at DESC");
+$stmtDel->execute(['uid' => $user['id']]);
+$deleted = $stmtDel->fetchAll();
+ 
+
 ?>
 <!doctype html>
 <html>
@@ -134,59 +141,74 @@ $profileImage = !empty($user['profile_image'])
 
   <hr class="my-5">
 
-  <h4 class="mb-3">Published Posts (<?= count($published) ?>)</h4>
-  <?php if ($published): ?>
+ <h4 class="mb-3">Published Posts (<?= count($published) ?>)</h4>
+ <div class="mb-3"></div>
+<?php if ($published): ?>
+  <div class="d-flex flex-column gap-3">
     <?php foreach ($published as $p): ?>
-      <div class="card mb-3">
-        <div class="card-body">
-          <h5 class="card-title"><?= htmlspecialchars($p['title']) ?></h5>
-          <a href="view_post.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-outline-primary">View</a>
-          <a href="edit_post.php?id=<?= urlencode($p['id']) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
-          <form method="post" action="delete_post.php" style="display:inline">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($p['id']) ?>">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
-            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-          </form>
+      <div class="card shadow-sm">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><?= htmlspecialchars($p['title']) ?></h5>
+            <p class="card-text text-muted mb-2"><?= htmlspecialchars($p['excerpt'] ?: 'No category') ?></p>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="view_post.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-primary">View</a>
+              <a href="edit_post.php?id=<?= urlencode($p['id']) ?>" class="btn btn-sm btn-warning text-white">Edit</a>
+              <form method="post" action="delete_post.php" style="display:inline">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($p['id']) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     <?php endforeach; ?>
-  <?php else: ?>
-    <div class="alert alert-info">You have no published posts.</div>
-  <?php endif; ?>
+  </div>
+<?php else: ?>
+  <div class="alert alert-info">You have no published posts.</div>
+<?php endif; ?>
 
-  <h4 class="mt-5 mb-3">Drafts (<?= count($drafts) ?>)</h4>
-  <?php if ($drafts): ?>
-    <?php foreach ($drafts as $d): ?>
-      <div class="card mb-3 border-warning">
-        <div class="card-body">
-          <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
-          <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-outline-warning">Edit</a>
-          <form method="post" action="publish_post.php" style="display:inline">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
-            <button type="submit" class="btn btn-sm btn-success">Publish</button>
-          </form>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  <?php else: ?>
-    <div class="alert alert-secondary">No drafts yet.</div>
-  <?php endif; ?>
-
-</div>
 <hr>
-<h4 class="mt-4 text-danger">🗑️ Deleted Posts</h4>
-<?php
-$stmt = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND is_deleted = 1 ORDER BY updated_at DESC");
-$stmt->execute(['uid' => currentUser()['id']]);
-$deleted = $stmt->fetchAll();
-?>
-
+<h4 class="mt-4 mb-3">Drafts (<?= count($drafts) ?>)</h4>
+<div class="mb-3"></div>
+<?php if ($drafts): ?>
+  <div class="d-flex flex-column gap-3">
+    <?php foreach ($drafts as $d): ?>
+      <div class="card shadow-sm">
+        <div class="card shadow-sm border-warning">
+          <div class="card-body">
+            <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
+            <p class="card-text text-muted mb-2"><?= htmlspecialchars($d['excerpt'] ?: 'No category') ?></p>
+            <div class="d-flex flex-wrap gap-2">
+              <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-warning text-white">Edit</a>
+              <form method="post" action="publish_post.php" style="display:inline">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                <button type="submit" class="btn btn-sm btn-success">Publish</button>
+              </form>
+              <form method="post" action="delete_post.php" style="display:inline">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+<?php else: ?>
+  <div class="alert alert-secondary">No drafts yet.</div>
+<?php endif; ?>
+<hr>
+<h4 class="mt-4 text-danger">Deleted Posts (<?= count($deleted) ?>)</h4>
+<div class="mb-3"></div>
 <?php if (!empty($deleted)): ?>
-  <div class="row">
+  <div class="d-flex flex-column gap-3">
     <?php foreach ($deleted as $d): ?>
-      <div class="col-md-6 mb-3">
-        <div class="card border-danger" style="background-color: #f8d7da;">
+      <div class="card shadow-sm">
+        <div class="card shadow-sm border-danger">
           <div class="card-body">
             <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
             <p class="card-text text-muted mb-2">
@@ -202,11 +224,11 @@ $deleted = $stmt->fetchAll();
               <form method="post" action="restore_post.php" class="d-inline">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
                 <input type="hidden" name="action" value="draft">
-                <button type="submit" class="btn btn-sm btn-secondary">Restore as Draft</button>
+                <button type="submit" class="btn btn-sm btn-warning text-white">Restore as Draft</button>
               </form>
               <form method="post" action="permanent_delete.php" class="d-inline" onsubmit="return confirm('Permanently delete this post?');">
                 <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                <button type="submit" class="btn btn-sm btn-outline-danger">Delete Permanently</button>
+                <button type="submit" class="btn btn-sm btn-danger">Delete Permanently</button>
               </form>
             </div>
           </div>
@@ -217,7 +239,6 @@ $deleted = $stmt->fetchAll();
 <?php else: ?>
   <p class="text-muted">No deleted posts.</p>
 <?php endif; ?>
-
-
+</div>
 </body>
 </html>
