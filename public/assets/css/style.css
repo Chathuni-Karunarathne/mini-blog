@@ -1,0 +1,471 @@
+/* ------------------------------
+   Wordora Theme — main stylesheet
+   Colors: #f9adaf (pink), #fef4ea (cream), white + soft accents
+   Font: Lora (serif), minimalistic, rounded, glass effects
+------------------------------ */
+
+:root{
+  --pink: #f9adaf;
+  --bgpink:#fef4ea;
+  --cream: #fef4ea;
+  --bg-pink: var(--bgpink); /* use the main pink as page background */
+  --accent-deep: #c84663; /* deeper pink for contrast */
+  --muted-brown: #4b2c2c;
+  --glass-white: rgba(255,255,255,0.62);
+  --glass-rose: rgba(249,173,175,0.12);
+  --card-radius: 20px;
+}
+
+/* Global */
+html,body{height:100%;}
+body {
+  /* pink page background for all pages */
+  background:#eccdce;
+  font-family: 'Lora', serif;
+  color: var(--muted-brown);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  line-height:1.6;
+}
+
+/* Strong override for Bootstrap utility class only (keep body free so auth animation can run) */
+.bg-light {
+  background: var(--bg-pink) !important;
+  background-image: none !important;
+}
+
+/* Utility containers */
+.section-wrapper {
+  background: var(--glass-white);
+  backdrop-filter: blur(8px) saturate(120%);
+  border-radius: 20px;
+  box-shadow: 0 6px 30px rgba(249,173,175,0.12);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ------------------------------
+   Navbar / Header
+------------------------------ */
+.glass-navbar {
+  /* very transparent glass navbar/footer: mostly see-through with a soft shadow */
+  background: rgba(255,255,255,0.06); /* almost invisible panel */
+  color: rgba(75,44,44,0.9);
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  border-radius: 14px;
+  padding: .35rem .9rem;
+  /* stronger shadow to slightly separate the panel from background */
+  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.navbar-brand{
+  font-family: 'Lora', serif;
+  font-weight:700;
+  color:var(--muted-brown) !important;
+  font-size:1.6rem;
+}
+
+.navbar-nav .nav-link{
+  color: var(--muted-brown) !important;
+  font-weight:500;
+  padding:.35rem .6rem;
+  transition: color .18s ease, transform .15s ease;
+}
+.navbar-nav .nav-link:hover{ color: var(--accent-deep) !important; transform: translateY(-1px);} 
+
+/* Active nav link (current page) */
+.navbar-nav .nav-link.active{
+  color: var(--pink) !important;
+  font-weight:700;
+}
+
+.btn-logout{
+  /* distinct pink logout button only */
+  background: var(--pink);
+  color: white;
+  border: none;
+  border-radius: 999px;
+  padding: .45rem .8rem;
+  box-shadow: 0 8px 20px rgba(201,76,99,0.12);
+}
+
+/* ------------------------------
+   Cards & Post list
+------------------------------ */
+.card{
+  border:none;
+  border-radius: var(--card-radius);
+  background: rgba(255,255,255,0.9); /* solid light card, removed gradient */
+  backdrop-filter: blur(6px) saturate(115%);
+  box-shadow: 0 10px 30px rgba(249,173,175,0.08);
+  overflow:hidden;
+  transition: transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s ease;
+}
+.glass-card{
+  /* more transparent, glassy variant for forms (solid) */
+  background: rgba(255,255,255,0.42);
+  backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.45);
+  box-shadow: 0 12px 30px rgba(249,173,175,0.06);
+}
+.card:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(249,173,175,0.12); }
+
+.card img{ width:100%; height:220px; object-fit:cover; display:block; }
+.card-body{ padding:1.25rem; }
+.card-title a{ text-decoration:none; color:var(--accent-deep); font-weight:600; }
+.card-title a:hover{ color: #7b2e2e; }
+
+/* ===== thin pink outline draw animation for post cards ===== */
+.post-card {
+  position: relative;           /* required so SVG overlay positions correctly */
+  overflow: visible;            /* allow animated stroke to render cleanly */
+}
+
+/* SVG overlay covers the card exactly */
+.card-outline-svg {
+  position: absolute;
+  inset: 0;                     /* top:0; right:0; bottom:0; left:0; */
+  width: 100%;
+  height: 100%;
+  pointer-events: none;         /* don't block clicks */
+  z-index: 2;                   /* above card content visually */
+}
+
+/* style the rect stroke and prepare stroke-dash animation */
+.card-outline-rect {
+  stroke: #f9adaf;              /* pink line color (your theme) */
+  stroke-width: 1.6;            /* very thin line */
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;       /* large enough to cover perimeter */
+  stroke-dashoffset: 1000;      /* initially hidden */
+  transition: stroke-dashoffset 900ms cubic-bezier(.2,.9,.2,1), opacity 300ms;
+  opacity: 0.95;
+  vector-effect: non-scaling-stroke;
+}
+
+/* on hover, draw the outline */
+.post-card:hover .card-outline-rect {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* class used to trigger initial load animation (we’ll add it via JS) */
+.post-card.animate .card-outline-rect {
+  stroke-dashoffset: 0;
+}
+
+/* slightly hide the outline on small cards so it isn't too strong */
+@media (max-width: 480px) {
+  .card-outline-rect { stroke-width: 1.2; }
+}
+
+
+
+/* Post meta */
+.text-muted{ color: rgba(75,44,44,0.65) !important; }
+
+/* ------------------------------
+   Forms and Inputs
+------------------------------ */
+input, textarea, select {
+  border-radius: 14px;
+  border: 1px solid rgba(75,44,44,0.08);
+  padding: .6rem .85rem;
+  background: rgba(255,255,255,0.6);
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+input:focus, textarea:focus, select:focus{
+  outline: none;
+  border-color: var(--pink);
+  box-shadow: 0 6px 20px rgba(249,173,175,0.12);
+}
+
+.form-label{ font-weight:600; color:var(--muted-brown); }
+
+/* Rounded, pill-like search bar */
+.input-group .form-control{
+  border-top-left-radius: 30px; border-bottom-left-radius: 30px; border-right: none;
+}
+.input-group .btn{
+  border-top-right-radius: 30px; border-bottom-right-radius: 30px;
+}
+
+/* Elegant search + sort */
+.search-bar { display:flex; gap:.75rem; align-items:center; }
+.search-bar .input-group{
+  flex: 1 1 auto;
+  border-radius: 40px;
+  overflow: hidden;
+  border: 1px solid rgba(75,44,44,0.06);
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.search-bar .input-group .form-control{
+  border: none;
+  background: transparent;
+  padding: .75rem 1rem;
+  box-shadow: none;
+}
+.search-bar .input-group .btn{
+  border: none;
+  background: transparent;
+  padding: .45rem .9rem;
+  color: var(--accent-deep);
+}
+.search-bar .input-group .btn:hover{ background: rgba(0,0,0,0.03); }
+
+.sort-select{
+  min-width:150px;
+  border-radius: 999px;
+  border: 1px solid rgba(75,44,44,0.06);
+  background: rgba(255,255,255,0.82);
+  color: var(--muted-brown);
+  padding: .45rem .75rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.sort-select:focus{ outline: none; box-shadow: 0 0 0 6px rgba(249,173,175,0.08); }
+
+@media (max-width: 767px){
+  .search-bar{ flex-direction: column; gap:.5rem; }
+  .sort-select{ width:100%; }
+}
+
+/* ------------------------------
+   Buttons
+------------------------------ */
+.btn{
+  border-radius: 999px;
+  font-weight:600;
+  padding:.55rem .9rem;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.btn:active{ transform: translateY(1px); }
+
+.btn-primary{
+  background: var(--pink);
+  border: none;
+  color: white;
+  box-shadow: 0 8px 22px rgba(201,76,99,0.12);
+}
+.btn-primary:hover{ filter:brightness(.98); box-shadow:0 12px 28px rgba(201,76,99,0.14); }
+
+/* Accent button used for Login / Register / Logout so changes can be applied centrally */
+.btn-accent{
+  background: var(--pink);
+  color: var(--muted-brown);
+  border: none;
+  border-radius: 999px;
+  padding: .55rem .9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(201,76,99,0.10);
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.btn-accent:hover{ filter: brightness(.98); transform: translateY(-1px); box-shadow: 0 12px 28px rgba(201,76,99,0.12); }
+.btn-accent:focus{ outline: none; box-shadow: 0 0 0 6px rgba(249,173,175,0.12); }
+
+.btn-outline-primary{
+  border: 1px solid var(--pink);
+  color: var(--accent-deep);
+  background: transparent;
+}
+.btn-outline-primary:hover{ background: var(--pink); color: white; }
+
+/* small ghost buttons */
+.btn-sm { padding:.35rem .6rem; }
+
+/* ------------------------------
+   Profile & avatars
+------------------------------ */
+.rounded-circle{ border-radius: 999px !important; }
+
+.profile-badge{
+  display:inline-flex; align-items:center; gap:.6rem;
+  padding:.35rem .6rem; border-radius:999px;
+  background: rgba(255,255,255,0.5); border:1px solid rgba(0,0,0,0.04);
+}
+
+/* ------------------------------
+   Color picker / post background circles
+------------------------------ */
+.color-circle{ width:32px; height:32px; border-radius:999px; display:inline-block; margin-right:.5rem; cursor:pointer; border:2px solid rgba(255,255,255,0.6); box-shadow:0 3px 12px rgba(0,0,0,0.04); }
+.color-circle.active{ transform:scale(1.08); box-shadow:0 6px 18px rgba(249,173,175,0.12); }
+
+/* ------------------------------
+   Small screens / responsiveness
+------------------------------ */
+@media (max-width: 991px){
+  .navbar-brand{ font-size:1.2rem; }
+  .card img{ height:180px; }
+}
+
+@media (max-width: 767px){
+  .container{ padding-left:.75rem; padding-right:.75rem; }
+  .card img{ height:160px; }
+  .section-wrapper{ padding:1rem; }
+  .navbar { padding:.25rem .5rem; }
+}
+
+/* ------------------------------
+   Tiny interactive helpers
+------------------------------ */
+.fade-in{ animation: fadeIn .45s ease both; }
+@keyframes fadeIn{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+.glass-toast{
+  position:fixed; right:1rem; bottom:1rem; z-index:1200; background:var(--glass-white); padding:.6rem .9rem; border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,0.06);
+}
+
+/* make main content push footer to bottom when content is short */
+.page-content{ flex: 1 0 auto; }
+
+/* Footer small print */
+footer p, .small{ color: rgba(75,44,44,0.55); }
+
+/* make inline alerts match theme */
+.alert-success{ background: linear-gradient(90deg, rgba(239,249,245,0.9), rgba(245,255,250,0.9)); border:1px solid rgba(200,230,210,0.5); color: #2b6b3a; }
+.alert-danger{ background: linear-gradient(90deg, rgba(255,240,240,0.95), rgba(255,250,250,0.95)); border:1px solid rgba(250,200,200,0.5); color:#7b2e2e; }
+
+/* Slight adjustments to parsedown output */
+.post-content img{ max-width:100%; border-radius:12px; }
+.post-content h1, .post-content h2, .post-content h3{ color:var(--muted-brown); }
+
+/* keep login/register cards compact */
+.card .card-body form .mb-3 input.form-control { height:44px; }
+
+/* --- Animated background for auth pages (login/register) --- */
+/* apply by adding class `auth-animated` to the page body */
+.auth-animated{
+  background: linear-gradient(120deg, #fef4ea, #f9adaf, #ffe5ec);
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* make glass-card shimmer when inside auth pages */
+.auth-animated .glass-card{
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(15px) saturate(120%);
+  -webkit-backdrop-filter: blur(15px) saturate(120%);
+  animation: shimmer 6s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+  0% { box-shadow: 0 0 10px rgba(249, 173, 175, 0.1); }
+  100% { box-shadow: 0 0 25px rgba(249, 173, 175, 0.3); }
+}
+
+/* ------------------------------
+   Posts carousel styles
+------------------------------ */
+.posts-carousel { position: relative; margin: 1.5rem 0; }
+.carousel-viewport {
+  /* horizontal scrolling with snap behavior */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+/* allow keyboard focus and smooth scrolling when using arrows */
+.carousel-viewport:focus{ outline: none; }
+.carousel-track { display: flex; gap: 1rem; padding: 0.25rem 0; align-items: start; }
+.carousel-track .card { min-width: 320px; max-width: 420px; flex: 0 0 auto; scroll-snap-align: start; display:flex; flex-direction:column; }
+
+/* Focus styles for card containers to improve keyboard visibility */
+.carousel-track .card:focus{
+  outline: 3px solid rgba(249,173,175,0.28);
+  outline-offset: 6px;
+  transform: translateY(-6px) scale(1.01);
+}
+
+/* ensure aria-disabled states are visible */
+.carousel-btn[aria-disabled='true']{ opacity: .45; cursor: default; pointer-events: none; }
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--glass-white);
+  color: var(--muted-brown);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  cursor: pointer;
+  z-index: 10;
+}
+.carousel-btn.prev{ left: -12px; }
+.carousel-btn.next{ right: -12px; }
+.carousel-btn:disabled{ opacity: .45; cursor: default; }
+
+@media (max-width: 991px){
+  .carousel-track .card { min-width: 280px; max-width: 360px; }
+}
+@media (max-width: 767px){
+  .carousel-track .card { min-width: 88%; max-width: 88%; }
+  .carousel-btn { width:38px; height:38px; }
+  .carousel-btn.prev{ left: 6px; }
+  .carousel-btn.next{ right: 6px; }
+}
+
+/* Make cards consistent height and allow excerpt clamping */
+.carousel-track .card { min-height: 360px; }
+.carousel-track .card .card-body{ display:flex; flex-direction:column; }
+.carousel-track .card .card-body .card-text{ flex: 1 1 auto; }
+
+.post-excerpt{
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .auth-animated, .auth-animated .glass-card, .carousel-viewport { animation: none !important; transition: none !important; }
+}
+
+/* Slightly shorter cards on very small screens to avoid excessive scrolling */
+@media (max-width: 520px){
+  .carousel-track .card { min-height: 320px; }
+}
+
+/* Icon helpers */
+.icon{ display:inline-block; width:1.25rem; height:1.25rem; vertical-align: middle; fill:none; stroke:currentColor; }
+.icon--muted{ color: var(--muted-brown); }
+.icon--accent{ color: var(--accent-deep); }
+.search-btn svg{ width:1.1rem; height:1.1rem; }
+
+/* Masonry postcard layout (CSS columns) */
+.masonry{
+  column-count: 3;
+  column-gap: 1rem;
+}
+.masonry-item{ display: inline-block; width:100%; margin: 0 0 1rem; break-inside: avoid; }
+.masonry-item .card{ border-radius: 16px; overflow: hidden; }
+.masonry-item .card .card-img-top img{ width:100%; height:auto; display:block; }
+
+/* Orientation-specific hints: portrait cards get taller image area */
+.masonry-item.portrait .card-img-top img{ height:420px; object-fit:cover; }
+.masonry-item.landscape .card-img-top img{ height:240px; object-fit:cover; }
+
+@media (max-width: 1100px){ .masonry{ column-count: 2; } }
+@media (max-width: 700px){ .masonry{ column-count: 1; } }
+
+

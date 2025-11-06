@@ -114,6 +114,8 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
   <!-- EasyMDE Markdown Editor -->
 <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+<link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
 
 </head>
 <body class="bg-light">
@@ -157,7 +159,7 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
   <label class="form-label d-block">Background Color</label>
   <div class="d-flex flex-wrap gap-2">
     <?php
-    $colors = ['#ffffff', '#f8f9fa', '#fff3cd', '#e0f7fa', '#e8f5e9', '#fce4ec', '#e3f2fd', '#f3e5f5'];
+    $colors = ['#fdf0f5', '#fadce9', '#f6bfd3', '#f19fb9', '#ea7ea3', '#f7d7db', '#fbe9df', '#f0e3d3'];
     foreach ($colors as $c):
     ?>
       <span 
@@ -220,4 +222,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
+<?php include __DIR__ . '/../src/partials/footer.php'; ?>
 

@@ -55,12 +55,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta charset="utf-8">
   <title>Register — Mini Blog</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="auth-animated">
   <div class="container py-5">
     <div class="row justify-content-center">
       <div class="col-md-6">
-        <div class="card shadow-sm">
+        <div class="card shadow-sm glass-card">
           <div class="card-body">
             <h3 class="card-title mb-3">Register</h3>
 
@@ -94,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input name="password_confirm" type="password" class="form-control">
               </div>
               <div class="d-grid">
-                <button class="btn btn-primary">Register</button>
+                <button class="btn btn-accent">Register</button>
               </div>
             </form>
 
@@ -108,3 +110,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </body>
 </html>
+
+<?php include __DIR__ . '/../src/partials/footer.php'; ?>

@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 $justRegistered = isset($_GET['registered']);
 ?>
 <!doctype html>
@@ -31,13 +32,17 @@ $justRegistered = isset($_GET['registered']);
   <meta charset="utf-8">
   <title>Login — Mini Blog</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-5">
-        <div class="card shadow-sm">
-          <div class="card-body">
+<body class="auth-animated">
+  <main class="page-content d-flex align-items-center justify-content-center">
+    <div class="container py-5">
+      <div class="row justify-content-center w-100">
+        <div class="col-md-5">
+          <div class="card shadow-sm glass-card">
+            <div class="card-body">
+            <b><h2 class="text-center mb-4">Hello Again!</h2></b>
             <h3 class="card-title mb-3">Login</h3>
 
             <?php if ($justRegistered): ?>
@@ -62,17 +67,20 @@ $justRegistered = isset($_GET['registered']);
                 <input name="password" type="password" class="form-control">
               </div>
               <div class="d-grid">
-                <button class="btn btn-primary">Login</button>
+                <button class="btn btn-accent">Login</button>
               </div>
             </form>
 
             <hr>
             <p class="small mb-0">Don't have an account? <a href="register.php">Register</a></p>
 
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
+
+  <?php include __DIR__ . '/../src/partials/footer.php'; ?>
 </body>
 </html>

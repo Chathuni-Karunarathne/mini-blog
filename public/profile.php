@@ -92,6 +92,9 @@ $deleted = $stmtDel->fetchAll();
   <meta charset="utf-8">
   <title>Profile — Mini Blog</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
@@ -242,3 +245,5 @@ $profileImage = !empty($user['profile_image'])
 </div>
 </body>
 </html>
+
+<?php include __DIR__ . '/../src/partials/footer.php'; ?>
