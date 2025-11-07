@@ -138,10 +138,9 @@ if (!empty($posts)) {
       ?>
       <div class="masonry-item <?= $orientation ?>">
         <div class="card mb-3 post-card" tabindex="0" style="background: <?= htmlspecialchars($p['bg_color'] ?? '#ffffff') ?>;">
-    <!-- SVG outline overlay (thin pink stroke) -->
-    <svg class="card-outline-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      <rect class="card-outline-rect" x="1" y="1" width="98%" height="98%" rx="16" ry="16" fill="none"></rect>
-    </svg>
+    <svg class="border-loop" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <rect class="border-path" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" rx="16" ry="16" fill="none"></rect>
+</svg>
           <?php if ($p['featured_image']): ?>
             <div class="card-img-top">
               <img loading="lazy" src="/mini-blog/<?=htmlspecialchars($p['featured_image'])?>" alt="<?=htmlspecialchars($p['title'])?>">

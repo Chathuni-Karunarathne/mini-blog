@@ -111,70 +111,72 @@ $stmt->execute([
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 
 <div class="container py-4">
-  <a href="posts.php" class="btn btn-link">&larr; Back</a>
-  <h2>New Post</h2>
+  <a href="posts.php" class="text-dark" style="text-decoration:none; font-size:1.2rem;">
+  &#8592;
+</a>
 
-  <?php if (!empty($errors)): ?>
-    <div class="alert alert-danger"><ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul></div>
-  <?php endif; ?>
+  <h2 class="text-center mb-4">New Post</h2>
 
-  <form method="post" enctype="multipart/form-data">
-    <div class="mb-3">
-      <label class="form-label">Title</label>
-      <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'])?>">
-    </div>
-    <div class="mb-3">
-  <label class="form-label">Genre</label>
-  <input name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'])?>">
-  <div class="form-text">Specify the category or genre of your post.</div>
+  <!-- ✅ Glass Box Wrapper -->
+  <div class="glass-box mx-auto mt-4 p-4 shadow-lg" style="max-width: 800px;">
+    
+    <?php if (!empty($errors)): ?>
+      <div class="alert alert-danger">
+        <ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul>
+      </div>
+    <?php endif; ?>
+
+    <!-- ✅ Single Form (keep everything inside this one) -->
+    <form method="post" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'] ?? '')?>">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Genre</label>
+        <input name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'] ?? '')?>">
+        <div class="form-text">Specify the category or genre of your post.</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Content</label>
+        <textarea id="content-editor" name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'] ?? '')?></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Featured Image (optional, max 2MB)</label>
+        <input type="file" name="featured_image" class="form-control" accept="image/*">
+      </div>
+
+      <!-- 🎨 Background Color Picker -->
+      <div class="mb-3">
+        <label class="form-label d-block">Background Color</label>
+        <div class="d-flex flex-wrap gap-2">
+          <?php
+          $colors = ['#fdf0f5', '#fadce9', '#f6bfd3', '#f19fb9', '#ea7ea3', '#f7d7db', '#fbe9df', '#f0e3d3'];
+          foreach ($colors as $c):
+          ?>
+            <span 
+              class="color-circle <?= (($old['bg_color'] ?? '#ffffff') === $c) ? 'selected' : '' ?>" 
+              data-color="<?= $c ?>" 
+              style="display:inline-block; width:30px; height:30px; border-radius:50%; background:<?= $c ?>; border:2px solid <?= (($old['bg_color'] ?? '#ffffff') === $c) ? '#007bff' : '#ccc' ?>; cursor:pointer;">
+            </span>
+          <?php endforeach; ?>
+          <input type="hidden" name="bg_color" id="bg_color" value="<?= htmlspecialchars($old['bg_color'] ?? '#ffffff') ?>">
+        </div>
+        <div class="form-text">Click a color circle to choose your background.</div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as Draft</button>
+        <button type="submit" name="action" value="publish" class="btn btn-primary">Publish</button>
+      </div>
+    </form>
+  </div> <!-- glass-box end -->
 </div>
+</body>
 
-    <div class="mb-3">
-  <label class="form-label">Content</label>
-  <textarea id="content-editor" name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'])?></textarea>
-</div>
-
-    <div class="mb-3">
-      <label class="form-label">Featured Image (optional, max 2MB)</label>
-      <input type="file" name="featured_image" class="form-control" accept="image/*">
-    </div>
-
-    <div class="mb-3">
-  <label class="form-label d-block">Background Color</label>
-  <div class="d-flex flex-wrap gap-2">
-    <?php
-    $colors = ['#fdf0f5', '#fadce9', '#f6bfd3', '#f19fb9', '#ea7ea3', '#f7d7db', '#fbe9df', '#f0e3d3'];
-    foreach ($colors as $c):
-    ?>
-      <span 
-        class="color-circle <?= (($old['bg_color'] ?? '#ffffff') === $c) ? 'selected' : '' ?>" 
-        data-color="<?= $c ?>" 
-        style="display:inline-block; width:30px; height:30px; border-radius:50%; background:<?= $c ?>; border:2px solid <?= (($old['bg_color'] ?? '#ffffff') === $c) ? '#007bff' : '#ccc' ?>; cursor:pointer;">
-      </span>
-    <?php endforeach; ?>
-    <input type="hidden" name="bg_color" id="bg_color" value="<?= htmlspecialchars($old['bg_color'] ?? '#ffffff') ?>">
-  </div>
-  <div class="form-text">Click a color circle to choose your background.</div>
-</div>
-
-<script>
-document.querySelectorAll('.color-circle').forEach(circle => {
-  circle.addEventListener('click', () => {
-    document.querySelectorAll('.color-circle').forEach(c => c.style.border = '2px solid #ccc');
-    circle.style.border = '2px solid #007bff';
-    document.getElementById('bg_color').value = circle.dataset.color;
-  });
-});
-</script>
-
-
-    <div class="d-flex gap-2">
-  <button type="submit" name="action" value="draft" class="btn btn-secondary"> Save as Draft</button>
-  <button type="submit" name="action" value="publish" class="btn btn-primary"> Publish</button>
-</div>
-
-  </form>
-</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {

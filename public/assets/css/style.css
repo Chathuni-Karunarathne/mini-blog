@@ -120,49 +120,49 @@ body {
 .card-title a{ text-decoration:none; color:var(--accent-deep); font-weight:600; }
 .card-title a:hover{ color: #7b2e2e; }
 
-/* ===== thin pink outline draw animation for post cards ===== */
+
+
+
+/* === Continuous animated pink border for post cards === */
 .post-card {
-  position: relative;           /* required so SVG overlay positions correctly */
-  overflow: visible;            /* allow animated stroke to render cleanly */
+  position: relative;
+  overflow: visible; /* ensures border isn’t cut off */
+  border-radius: 16px;
 }
 
-/* SVG overlay covers the card exactly */
-.card-outline-svg {
+/* SVG border outline that floats around the card */
+.border-loop {
   position: absolute;
-  inset: 0;                     /* top:0; right:0; bottom:0; left:0; */
-  width: 100%;
-  height: 100%;
-  pointer-events: none;         /* don't block clicks */
-  z-index: 2;                   /* above card content visually */
+  top: -3px;
+  left: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  pointer-events: none;
+  z-index: 5;
 }
 
-/* style the rect stroke and prepare stroke-dash animation */
-.card-outline-rect {
-  stroke: #f9adaf;              /* pink line color (your theme) */
-  stroke-width: 1.6;            /* very thin line */
+/* Animated tracing line */
+.border-path {
+  stroke: #f9adaf;
+  stroke-width: 4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 1000;       /* large enough to cover perimeter */
-  stroke-dashoffset: 1000;      /* initially hidden */
-  transition: stroke-dashoffset 900ms cubic-bezier(.2,.9,.2,1), opacity 300ms;
-  opacity: 0.95;
-  vector-effect: non-scaling-stroke;
+  fill: none;
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: loopBorder 6s linear infinite;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 4px rgba(249, 173, 175, 0.5));
 }
 
-/* on hover, draw the outline */
-.post-card:hover .card-outline-rect {
-  stroke-dashoffset: 0;
-  opacity: 1;
-}
-
-/* class used to trigger initial load animation (we’ll add it via JS) */
-.post-card.animate .card-outline-rect {
-  stroke-dashoffset: 0;
-}
-
-/* slightly hide the outline on small cards so it isn't too strong */
-@media (max-width: 480px) {
-  .card-outline-rect { stroke-width: 1.2; }
+/* Animation keyframes */
+@keyframes loopBorder {
+  0% {
+    stroke-dashoffset: 600;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 
@@ -468,4 +468,49 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 @media (max-width: 1100px){ .masonry{ column-count: 2; } }
 @media (max-width: 700px){ .masonry{ column-count: 1; } }
 
+/* === Glass Box Wrapper (like Login Page) === */
+.glass-box {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(249, 173, 175, 0.3);
+  box-shadow: 0 4px 20px rgba(249, 173, 175, 0.15);
+  max-width: 700px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+
+.glass-box {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(249, 173, 175, 0.25);
+}
+
+
+.glass-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(249, 173, 175, 0.25);
+}
+
+/* Form label and input styling */
+.glass-box .form-label {
+  font-weight: 600;
+  color: #b65c6c;
+  font-family: 'Lora', serif;
+}
+
+.glass-box .form-control {
+  border-radius: 12px;
+  border: 1px solid rgba(249, 173, 175, 0.4);
+  background-color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+}
+
+.glass-box .form-control:focus {
+  border-color: #f9adaf;
+  box-shadow: 0 0 0 0.2rem rgba(249, 173, 175, 0.25);
+}
 

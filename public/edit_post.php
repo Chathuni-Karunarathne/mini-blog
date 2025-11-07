@@ -121,8 +121,13 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 <div class="container py-4">
-  <a href="posts.php" class="btn btn-link">&larr; Back</a>
-  <h2>Edit Post</h2>
+ <a href="posts.php" class="text-dark" style="text-decoration:none; font-size:1.2rem;">
+  &#8592;
+</a>
+<h2 class="mt-2">Edit Post</h2>
+
+<div class="glass-box mx-auto mt-4 p-4 shadow-lg">
+
 
   <?php if (!empty($errors)): ?>
     <div class="alert alert-danger"><ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul></div>
