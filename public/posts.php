@@ -5,7 +5,7 @@ require __DIR__ . '/../src/helpers/markdown.php';
 
 // Get search and sort inputs
 $search = trim($_GET['search'] ?? '');
-$sort = $_GET['sort'] ?? 'desc'; // newest first by default
+$sort = $_GET['sort'] ?? ''; // leave empty on initial load (no selection)
 
 // Base SQL
 $sql = "SELECT p.*, u.username FROM blogPost p JOIN user u ON p.user_id = u.id WHERE p.status = 'published' AND p.is_deleted = 0";
@@ -25,14 +25,17 @@ if ($search !== '') {
 }
 
 
-// Sorting 
+// Sorting
 if ($sort === 'asc') {
-    $sql .= " ORDER BY p.created_at ASC";
+  $sql .= " ORDER BY p.created_at ASC";
 } elseif ($sort === 'desc') {
-    $sql .= " ORDER BY p.created_at DESC";
+  $sql .= " ORDER BY p.created_at DESC";
+} elseif ($sort === 'all') {
+  // "all" - show everything (use id order for deterministic ordering)
+  $sql .= " ORDER BY p.id ASC";
 } else {
-    // "all" - show everything without order change
-    $sql .= " ORDER BY p.id ASC";
+  // default when no sort selected: most recent first
+  $sql .= " ORDER BY p.created_at DESC";
 }
 
 
@@ -63,8 +66,6 @@ if (!empty($posts)) {
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 <div class="container py-4">
   <div class="d-flex justify-content-between mb-3">
-    <h1>Posts</h1>
-
 <?php if ($search): ?>
   <p class="text-muted mb-4">
     Showing results for <strong>"<?= htmlspecialchars($search) ?>"</strong>
@@ -110,7 +111,7 @@ if (!empty($posts)) {
         </button>
       </div>
 
-      <select name="sort" class="form-select w-auto ms-2 sort-select" onchange="this.form.submit()" aria-label="Sort posts">
+      <select name="sort" class="form-select w-auto ms-2 sort-select" aria-label="Sort posts">
         <option value="desc" <?= $sort === 'desc' ? 'selected' : '' ?>>Most Recent</option>
         <option value="asc" <?= $sort === 'asc' ? 'selected' : '' ?>>Oldest</option>
         <option value="all" <?= $sort === 'all' ? 'selected' : '' ?>>All Posts</option>
@@ -239,6 +240,26 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+
+    <script>
+    // Wire sort-select behavior: when "All Posts" is chosen, clear the search input
+    document.addEventListener('DOMContentLoaded', function() {
+      const sortSelect = document.querySelector('.sort-select');
+      const searchInput = document.querySelector('input[name="search"]');
+      if (!sortSelect) return;
+
+      sortSelect.addEventListener('change', function(e) {
+        // If user chooses "All Posts", clear any search term so all posts are shown
+        if (e.target.value === 'all' && searchInput) {
+          searchInput.value = '';
+        }
+        // Submit the form after adjusting the search input
+        // walk up to nearest form in case DOM structure changes
+        const form = e.target.form || document.querySelector('form');
+        if (form) form.submit();
+      });
+    });
+    </script>
 
   <?php include __DIR__ . '/../src/partials/footer.php'; ?>
 

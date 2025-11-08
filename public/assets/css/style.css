@@ -186,6 +186,75 @@ input:focus, textarea:focus, select:focus{
   box-shadow: 0 6px 20px rgba(249,173,175,0.12);
 }
 
+/* ------------------------------
+   File input (profile image) — cream background, no underline
+   Targets file input when using Bootstrap's .form-control and ensures
+   it visually matches the Wordora theme. Also overrides the small
+   fixed-height rule applied elsewhere to keep the control fitting.
+------------------------------ */
+/* Make the file input act as a single, seamless control: */
+input[type="file"].form-control {
+  display: flex !important;
+  align-items: stretch !important; /* allow button to fill full height */
+  gap: 0 !important;
+  padding: .25rem .5rem !important; /* smaller padding so button aligns */
+  height: auto !important; /* override any fixed-height helpers */
+  background: #fff !important; /* main area white; button will be cream */
+  color: var(--muted-brown) !important;
+  border: 1px solid rgba(75,44,44,0.06) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04) !important;
+  overflow: hidden !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Modern and WebKit file selector button styling */
+/* Styling for the choose-file button only */
+/* Style only the native button inside the file input so it appears as a cream pill
+   and fills the input height without leaving a white gap. Use !important to
+   override UA and framework defaults. */
+input[type="file"].form-control::file-selector-button,
+input[type="file"].form-control::-webkit-file-upload-button,
+input[type="file"].form-control::-moz-file-upload-button {
+  background: var(--cream) !important;
+  color: var(--muted-brown) !important;
+  border: none !important;
+  padding: .45rem .9rem !important;
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  margin: 0 !important;
+  cursor: pointer !important;
+  font-weight: 700 !important;
+  align-self: stretch !important; /* ensure it matches the input height */
+  -webkit-appearance: none !important;
+}
+
+/* IE/Old Edge fallback */
+input[type="file"].form-control::-ms-browse {
+  background: var(--cream);
+  color: var(--muted-brown);
+  border-radius: 999px;
+}
+
+/* Stronger specificity for the narrow helper that sets inputs to 44px */
+.card .card-body form .mb-3 input[type="file"].form-control {
+  height: auto !important;
+  padding: .5rem .75rem;
+}
+
+/* Ensure the non-button text area remains white and doesn't inherit rounded clipping from the button */
+/* remove any leftover left-radius on the button so there is no visible seam */
+input[type="file"].form-control::-webkit-file-upload-button { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; }
+input[type="file"].form-control::file-selector-button { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; }
+
+/* Also hide the default focus outline and replace with subtle box-shadow on focus */
+input[type="file"].form-control:focus { outline: none !important; box-shadow: 0 0 0 3px rgba(249,173,175,0.08) !important; }
+input[type="file"].form-control:focus::file-selector-button { box-shadow: none !important; }
+
+
 .form-label{ font-weight:600; color:var(--muted-brown); }
 
 /* Rounded, pill-like search bar */
@@ -468,6 +537,30 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 @media (max-width: 1100px){ .masonry{ column-count: 2; } }
 @media (max-width: 700px){ .masonry{ column-count: 1; } }
 
+/* Profile avatar: ensure perfectly round avatar with equal vertical spacing */
+.profile-avatar-wrap{
+  /* circular mask for avatar so any source (including default rounded-rect) is clipped to a circle */
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-block;
+  margin: 0 auto;
+  background: #fff; /* ensure transparent corners in source images show as circle (not rounded-rect) */
+}
+.profile-avatar{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* Strong fallback to override global .card img rules that may resize/shape the avatar */
+.card .profile-avatar-wrap { width: 110px; height:110px; }
+.card .profile-avatar { width: 110px; height: 110px; object-fit: cover; }
+
 /* === Glass Box Wrapper (like Login Page) === */
 .glass-box {
   background: rgba(255, 255, 255, 0.5);
@@ -513,4 +606,131 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
   border-color: #f9adaf;
   box-shadow: 0 0 0 0.2rem rgba(249, 173, 175, 0.25);
 }
+
+/* --- Larger Circular Profile Avatar (280x280) --- */
+.profile-avatar-wrap {
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 4px solid rgba(249, 173, 175, 0.5);
+  box-shadow: 0 6px 25px rgba(249, 173, 175, 0.2);
+  margin: 0 auto;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50% !important;
+  display: block;
+}
+
+/* Ensure consistent size inside cards or forms */
+.card .profile-avatar-wrap {
+  width: 280px !important;
+  height: 280px !important;
+}
+
+.card .profile-avatar,
+.card img.profile-avatar {
+  width: 280px !important;
+  height: 280px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+}
+
+/* ------------------------------
+   Profile tabs (Published / Drafts / Deleted)
+   Small, rounded pill tabs above a panel. Accessible and keyboard friendly.
+------------------------------ */
+.profile-tabs{ display:flex; gap:.5rem; align-items:center; margin-bottom:1rem; }
+.profile-tabs .tab{
+  background: rgba(255,255,255,0.92);
+  color: var(--muted-brown);
+  border: 1px solid rgba(75,44,44,0.04);
+  padding: .5rem 1rem;
+  border-radius: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.profile-tabs .tab:focus{ outline: none; box-shadow: 0 0 0 4px rgba(249,173,175,0.08); }
+.profile-tabs .tab:hover{ transform: translateY(-2px); }
+.profile-tabs .tab.active{
+  background: var(--pink);
+  color: white;
+  box-shadow: 0 10px 28px rgba(201,76,99,0.10);
+}
+.profile-tabs .tab .count{ background: rgba(255,255,255,0.85); color: var(--muted-brown); padding: 0 .5rem; border-radius: 999px; margin-left:.5rem; font-weight:700; }
+
+.tab-panel{ padding: .75rem 0; }
+.tab-panel[hidden]{ display: none; }
+
+/* Make sure the panel area sits on a soft cream strip to match the inspo */
+.profile-panels-wrap{ background: rgba(249,173,175,0.03); border-radius: 12px; padding: .75rem; border: 1px solid rgba(249,173,175,0.04); }
+
+/* profile card wrapper to hold the tabs on top (Google-like) */
+.profile-card{
+  padding-top: 0;
+  background: transparent !important; /* remove outer white box */
+  box-shadow: none !important;
+  border: none !important;
+}
+.profile-card .profile-tabs{
+  position: relative; /* tabs flow inside the card */
+  display:flex;
+  justify-content:flex-start;
+  gap:.5rem;
+  margin: 0 0 0 0;
+  background: transparent;
+  z-index: 20;
+}
+.profile-card .profile-tabs .tab{
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  border-radius: 999px 999px 6px 6px; /* slight bottom radius so active tab can blend */
+  padding: .5rem .9rem;
+  background: rgba(255,255,255,0.98);
+  border: 1px solid rgba(75,44,44,0.04);
+}
+.profile-card .profile-tabs .tab.active{
+  /* selected tab uses the brand pink and sits flush with the panel below */
+  background: #f9adaf !important; /* explicit pink to match request */
+  color: white;
+  box-shadow: 0 12px 30px rgba(201,76,99,0.12);
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom: none !important; /* remove bottom border so panel's top border shows */
+  z-index: 30;
+}
+.profile-card .profile-panels-wrap{ margin-top: 0; }
+
+/* Make the panel itself the soft pink box that tabs connect to */
+.profile-card .profile-panels-wrap{
+  background: #f9adaf; /* full pink box as requested */
+  border-radius: 8px;
+  padding: 1rem;
+  /* remove thin border since box is now solid pink */
+  border: none;
+  margin-top: 0; /* no overlap needed when box is same color as tab */
+}
+
+/* Remove grey alert background inside profile panels (e.g., "No drafts yet")
+   so single-line notices blend into the pink panel. Keep text readable. */
+.profile-card .profile-panels-wrap .alert {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--muted-brown) !important;
+  padding: .25rem 0 !important;
+  margin: 0 !important;
+}
+
+/* Ensure active tab visually connects — remove bottom shadow overlap */
+.profile-card .profile-tabs .tab.active{ box-shadow: 0 6px 18px rgba(201,76,99,0.08); }
+
 

@@ -124,7 +124,7 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
  <a href="posts.php" class="text-dark" style="text-decoration:none; font-size:1.2rem;">
   &#8592;
 </a>
-<h2 class="mt-2">Edit Post</h2>
+<h2 class="mt-2 text-center">Edit Post</h2>
 
 <div class="glass-box mx-auto mt-4 p-4 shadow-lg">
 

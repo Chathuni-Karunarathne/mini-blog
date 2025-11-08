@@ -40,7 +40,7 @@ $update->execute(['id' => $post['id']]);
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 <div class="container py-4">
-  <a class="btn btn-link" href="posts.php">&larr; Back to posts</a>
+  <a href="posts.php" class="text-dark" style="text-decoration:none; font-size:1.2rem;">&#8592;</a>
 
   <div class="card" style="background-color: <?= htmlspecialchars($post['bg_color'] ?? '#ffffff') ?>;">
     <?php if ($post['featured_image']): ?>
