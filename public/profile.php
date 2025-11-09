@@ -11,8 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    // --- Image upload ---
-    $profileImagePath = $user['profile_image'] ?? null;
+  // --- Image upload / removal ---
+  $profileImagePath = $user['profile_image'] ?? null;
+
+  // Handle explicit removal request (small inline form posts remove_profile_image=1)
+  if (!empty($_POST['remove_profile_image'])) {
+    if ($profileImagePath && file_exists(__DIR__ . '/../' . $profileImagePath)) {
+      @unlink(__DIR__ . '/../' . $profileImagePath);
+    }
+    $profileImagePath = null;
+  }
     if (!empty($_FILES['profile_image']) && $_FILES['profile_image']['error'] !== UPLOAD_ERR_NO_FILE) {
         $allowed = ['image/jpeg', 'image/png', 'image/gif'];
         $file = $_FILES['profile_image'];
@@ -82,6 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// If the form was submitted but had errors, prefer submitted values for the form
+$form_full_name = $_POST['full_name'] ?? $user['full_name'] ?? '';
+$form_email = $_POST['email'] ?? $user['email'] ?? '';
+$form_profile_image = $user['profile_image'] ?? null;
+
+// Decide which profile image to display: prefer any updated/removed value from this request
+$displayProfilePath = $profileImagePath ?? $form_profile_image ?? $user['profile_image'] ?? null;
+
 // fetch posts
 $stmtPub = $pdo->prepare("SELECT * FROM blogPost WHERE user_id = :uid AND status='published' ORDER BY created_at DESC");
 $stmtPub->execute(['uid' => $user['id']]);
@@ -106,19 +122,19 @@ $deleted = $stmtDel->fetchAll();
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
-
+</head>
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
 
 <div class="container py-5">
-  <h2 class="text-center">Your Profile</h2>
-
+  
   <?php if ($errors): ?>
-    <div class="alert alert-danger"><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div>
+    <div class="alert alert-danger" role="alert" aria-live="assertive"><ul><?php foreach ($errors as $e): ?><li><?= htmlspecialchars($e) ?></li><?php endforeach; ?></ul></div>
   <?php endif; ?>
   <?php if ($success): ?>
-    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+    <div class="alert alert-success" role="status"><?= htmlspecialchars($success) ?></div>
   <?php endif; ?>
 
   <div class="card shadow-sm">
@@ -126,34 +142,46 @@ $deleted = $stmtDel->fetchAll();
   <div class="row align-items-center">
         <div class="col-md-4 text-center">
       <?php
-$profileImage = !empty($user['profile_image'])
-    ? '/mini-blog/' . htmlspecialchars($user['profile_image'])
-    : '/mini-blog/public/assets/profile-pic.jpg';
+$profileImage = !empty($displayProfilePath)
+  ? '/mini-blog/' . htmlspecialchars($displayProfilePath)
+  : '/mini-blog/public/assets/profile-pic.jpg';
 ?>
-  <div class="profile-avatar-wrap">
+  <div class="profile-avatar-wrap" aria-hidden="true">
     <img src="<?= $profileImage ?>" class="profile-avatar" alt="Profile picture">
   </div>
     </div>
 
     <div class="col-md-8">
-      <form method="post" enctype="multipart/form-data">
+      <form method="post" enctype="multipart/form-data" autocomplete="on" role="form">
         <div class="mb-3">
-          <label class="form-label">Full Name</label>
-          <input type="text" name="full_name" class="form-control" value="<?= htmlspecialchars($user['full_name'] ?? '') ?>">
+          <label for="full_name" class="form-label">Full name</label>
+          <input id="full_name" type="text" name="full_name" class="form-control" value="<?= htmlspecialchars($form_full_name) ?>">
         </div>
         <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($user['email']) ?>">
+          <label for="email" class="form-label">Email</label>
+          <input id="email" type="email" name="email" class="form-control" value="<?= htmlspecialchars($form_email) ?>" required autocomplete="email">
         </div>
         <div class="mb-3">
-          <label class="form-label">New Password (leave blank to keep current)</label>
-          <input type="password" name="password" class="form-control" placeholder="Enter new password">
+          <label for="password" class="form-label">New password <small class="text-muted">(leave blank to keep current)</small></label>
+          <input id="password" type="password" name="password" class="form-control" placeholder="Enter new password" autocomplete="new-password">
         </div>
         <div class="mb-3">
-          <label class="form-label">Profile Image</label>
-          <input type="file" name="profile_image" class="form-control" accept="image/*">
+          <label for="profile_image" class="form-label">Profile image</label>
+          <div class="d-flex align-items-center gap-2">
+            <div style="flex:1;">
+              <input id="profile_image" type="file" name="profile_image" class="form-control" accept="image/*">
+            </div>
+            <?php if (!empty($form_profile_image)): ?>
+              <div class="d-flex gap-2">
+                <button type="submit" name="remove_profile_image" value="1" class="btn btn-sm btn-outline-secondary">Remove photo</button>
+                <a href="<?= htmlspecialchars($profileImage) ?>" target="_blank" class="btn btn-sm btn-outline-primary">View full</a>
+              </div>
+            <?php endif; ?>
+          </div>
         </div>
-        <button class="btn btn-primary">Update Profile</button>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-cream">Update profile</button>
+        </div>
       </form>
         </div>
       </div>
@@ -179,19 +207,17 @@ $profileImage = !empty($user['profile_image'])
         <div class="d-flex flex-column gap-3">
           <?php foreach ($published as $p): ?>
             <div class="card shadow-sm">
-              <div class="card shadow-sm">
-                <div class="card-body">
-                  <h5 class="card-title"><?= htmlspecialchars($p['title']) ?></h5>
-                  <p class="card-text text-muted mb-2"><?= htmlspecialchars($p['excerpt'] ?: 'No category') ?></p>
-                  <div class="d-flex flex-wrap gap-2">
-                    <a href="view_post.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-primary">View</a>
-                    <a href="edit_post.php?id=<?= urlencode($p['id']) ?>" class="btn btn-sm btn-warning text-white">Edit</a>
-                    <form method="post" action="delete_post.php" style="display:inline">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($p['id']) ?>">
-                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
-                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                  </div>
+              <div class="card-body">
+                <h5 class="card-title"><?= htmlspecialchars($p['title']) ?></h5>
+                <p class="card-text text-muted mb-2"><?= htmlspecialchars($p['excerpt'] ?: 'No category') ?></p>
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="view_post.php?slug=<?= urlencode($p['slug']) ?>" class="btn btn-sm btn-primary">View</a>
+                  <a href="edit_post.php?id=<?= urlencode($p['id']) ?>" class="btn btn-sm btn-cream">Edit</a>
+                  <form method="post" action="delete_post.php" style="display:inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($p['id']) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
                 </div>
               </div>
             </div>
@@ -208,24 +234,22 @@ $profileImage = !empty($user['profile_image'])
       <?php if ($drafts): ?>
         <div class="d-flex flex-column gap-3">
           <?php foreach ($drafts as $d): ?>
-            <div class="card shadow-sm">
-              <div class="card shadow-sm border-warning">
-                <div class="card-body">
-                  <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
-                  <p class="card-text text-muted mb-2"><?= htmlspecialchars($d['excerpt'] ?: 'No category') ?></p>
-                  <div class="d-flex flex-wrap gap-2">
-                    <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-warning text-white">Edit</a>
-                    <form method="post" action="publish_post.php" style="display:inline">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
-                      <button type="submit" class="btn btn-sm btn-success">Publish</button>
-                    </form>
-                    <form method="post" action="delete_post.php" style="display:inline">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                      <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
-                      <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                    </form>
-                  </div>
+            <div class="card shadow-sm border-warning">
+              <div class="card-body">
+                <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
+                <p class="card-text text-muted mb-2"><?= htmlspecialchars($d['excerpt'] ?: 'No category') ?></p>
+                <div class="d-flex flex-wrap gap-2">
+                  <a href="edit_post.php?id=<?= urlencode($d['id']) ?>" class="btn btn-sm btn-cream">Edit</a>
+                  <form method="post" action="publish_post.php" style="display:inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                    <button type="submit" class="btn btn-sm btn-success">Publish</button>
+                  </form>
+                  <form method="post" action="delete_post.php" style="display:inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(ensureCsrfToken()) ?>">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
                 </div>
               </div>
             </div>
@@ -242,30 +266,28 @@ $profileImage = !empty($user['profile_image'])
       <?php if (!empty($deleted)): ?>
         <div class="d-flex flex-column gap-3">
           <?php foreach ($deleted as $d): ?>
-            <div class="card shadow-sm">
-              <div class="card shadow-sm border-danger">
-                <div class="card-body">
-                  <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
-                  <p class="card-text text-muted mb-2">
-                    <?= htmlspecialchars($d['excerpt'] ?: 'No category') ?><br>
-                    <small>Deleted on: <?= htmlspecialchars($d['updated_at'] ?? $d['created_at']) ?></small>
-                  </p>
-                  <div class="d-flex flex-wrap gap-2">
-                    <form method="post" action="restore_post.php" class="d-inline">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                      <input type="hidden" name="action" value="publish">
-                      <button type="submit" class="btn btn-sm btn-success">Restore as Published</button>
-                    </form>
-                    <form method="post" action="restore_post.php" class="d-inline">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                      <input type="hidden" name="action" value="draft">
-                      <button type="submit" class="btn btn-sm btn-warning text-white">Restore as Draft</button>
-                    </form>
-                    <form method="post" action="permanent_delete.php" class="d-inline" onsubmit="return confirm('Permanently delete this post?');">
-                      <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
-                      <button type="submit" class="btn btn-sm btn-danger">Delete Permanently</button>
-                    </form>
-                  </div>
+            <div class="card shadow-sm border-danger">
+              <div class="card-body">
+                <h5 class="card-title"><?= htmlspecialchars($d['title']) ?></h5>
+                <p class="card-text text-muted mb-2">
+                  <?= htmlspecialchars($d['excerpt'] ?: 'No category') ?><br>
+                  <small>Deleted on: <?= htmlspecialchars($d['updated_at'] ?? $d['created_at']) ?></small>
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                  <form method="post" action="restore_post.php" class="d-inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                    <input type="hidden" name="action" value="publish">
+                    <button type="submit" class="btn btn-sm btn-success">Restore as Published</button>
+                  </form>
+                  <form method="post" action="restore_post.php" class="d-inline">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                    <input type="hidden" name="action" value="draft">
+                    <button type="submit" class="btn btn-sm btn-cream">Restore as Draft</button>
+                  </form>
+                  <form method="post" action="permanent_delete.php" class="d-inline" onsubmit="return confirm('Permanently delete this post?');">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($d['id']) ?>">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete Permanently</button>
+                  </form>
                 </div>
               </div>
             </div>

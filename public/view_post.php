@@ -36,6 +36,7 @@ $update->execute(['id' => $post['id']]);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
@@ -56,7 +57,7 @@ $update->execute(['id' => $post['id']]);
 
     <?php if (isLoggedIn() && (currentUser()['id'] ?? 0) == $post['user_id']): ?>
   <hr>
-  <a class="btn btn-sm btn-outline-primary" href="edit_post.php?id=<?=urlencode($post['id'])?>">Edit</a>
+  <a class="btn btn-sm btn-cream" href="edit_post.php?id=<?=urlencode($post['id'])?>">Edit</a>
 
   <form method="post" action="delete_post.php" onsubmit="return confirm('Delete this post?');" style="display:inline">
     <input type="hidden" name="id" value="<?=htmlspecialchars($post['id'])?>">

@@ -57,6 +57,8 @@ if (!empty($posts)) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
+</head>
 </head>
 <body class="bg-light">
 
@@ -138,7 +140,7 @@ if (!empty($posts)) {
         }
       ?>
       <div class="masonry-item <?= $orientation ?>">
-        <div class="card mb-3 post-card" tabindex="0" style="background: <?= htmlspecialchars($p['bg_color'] ?? '#ffffff') ?>;">
+  <div class="card mb-3 post-card" tabindex="0" style="--post-bg: <?= htmlspecialchars($p['bg_color'] ?? '#ffffff') ?>; background-color: <?= htmlspecialchars($p['bg_color'] ?? '#ffffff') ?>;">
     <svg class="border-loop" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
   <rect class="border-path" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" rx="16" ry="16" fill="none"></rect>
 </svg>

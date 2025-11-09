@@ -94,14 +94,15 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
         exit;
     }
 
-    // re-fill $old for the form
+    // re-fill $old for the form using submitted values when validation failed
     $old = [
-  'title' => $post['title'],
-  'excerpt' => $post['excerpt'],
-  'content' => $post['content'],
-  'status' => $post['status'],
-  'bg_color' => $post['bg_color'] ?? '#ffffff'
-];
+      'title' => $_POST['title'] ?? $post['title'],
+      'excerpt' => $_POST['excerpt'] ?? $post['excerpt'],
+      'content' => $_POST['content'] ?? $post['content'],
+      'status' => $status ?? $post['status'],
+      'bg_color' => $bg_color ?? ($post['bg_color'] ?? '#ffffff'),
+      'featured_image' => $featuredImagePath ?? $post['featured_image'] ?? null
+    ];
 
 }
 ?>
@@ -116,7 +117,9 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+</head>
 
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 </head>
 <body class="bg-light">
 <?php include __DIR__ . '/../src/partials/navbar.php'; ?>
@@ -124,47 +127,45 @@ $bg_color = $_POST['bg_color'] ?? '#ffffff';
  <a href="posts.php" class="text-dark" style="text-decoration:none; font-size:1.2rem;">
   &#8592;
 </a>
-<h2 class="mt-2 text-center">Edit Post</h2>
-
 <div class="glass-box mx-auto mt-4 p-4 shadow-lg">
 
 
   <?php if (!empty($errors)): ?>
-    <div class="alert alert-danger"><ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul></div>
+    <div class="alert alert-danger" role="alert" aria-live="assertive"><ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul></div>
   <?php endif; ?>
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" autocomplete="on">
     <div class="mb-3">
-      <label class="form-label">Title</label>
-      <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'] ?? '')?>">
+      <label for="title" class="form-label">Title</label>
+      <input id="title" name="title" class="form-control" value="<?=htmlspecialchars($old['title'] ?? '')?>" required autofocus>
     </div>
 
     <div class="mb-3">
-  <label class="form-label">Genre</label>
-  <input name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'])?>">
+  <label for="excerpt" class="form-label">Genre</label>
+  <input id="excerpt" name="excerpt" class="form-control" placeholder="e.g., Technology, Travel, Food" value="<?=htmlspecialchars($old['excerpt'])?>">
   <div class="form-text">Specify the category or genre of your post.</div>
 </div>
 
 
     <div class="mb-3">
-  <label class="form-label">Content</label>
-  <textarea id="content-editor" name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'])?></textarea>
+  <label for="content-editor" class="form-label">Content</label>
+  <textarea id="content-editor" name="content" rows="10" class="form-control" required><?=htmlspecialchars($old['content'])?></textarea>
 </div>
 
 
     <div class="mb-3">
-      <label class="form-label">Featured Image (leave empty to keep current)</label>
+      <label for="featured_image" class="form-label">Featured Image (leave empty to keep current)</label>
       <?php if (!empty($old['featured_image'])): ?>
         <div class="mb-2"><img src="/mini-blog/<?=htmlspecialchars($old['featured_image'])?>" style="max-width:200px;"></div>
       <?php endif; ?>
-      <input type="file" name="featured_image" class="form-control" accept="image/*">
+      <input id="featured_image" type="file" name="featured_image" class="form-control" accept="image/*">
     </div>
 
     <div class="mb-3">
   <label class="form-label d-block">Background Color</label>
   <div class="d-flex flex-wrap gap-2">
     <?php
-    $colors = ['#fdf0f5', '#fadce9', '#f6bfd3', '#f19fb9', '#ea7ea3', '#f7d7db', '#fbe9df', '#f0e3d3'];
+    $colors = ['#FCEDF0', '#FDE2E7', '#FDD7DE', '#FECBD4', '#FEC0CB', '#ee8598ff', '#fbe9df', '#f0e3d3'];
     foreach ($colors as $c):
     ?>
       <span 
@@ -192,7 +193,7 @@ document.querySelectorAll('.color-circle').forEach(circle => {
 
 
     <div class="d-flex gap-2">
-  <button type="submit" name="action" value="draft" class="btn btn-secondary"> Save as Draft</button>
+  <button type="submit" name="action" value="draft" class="btn btn-cream"> Save as Draft</button>
   <button type="submit" name="action" value="publish" class="btn btn-primary"> Publish</button>
 </div>
 

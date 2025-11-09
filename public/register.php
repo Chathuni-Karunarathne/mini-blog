@@ -57,57 +57,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 </head>
+</head>
+</body>
 <body class="auth-animated">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
-        <div class="card shadow-sm glass-card">
-          <div class="card-body">
-            <h3 class="card-title mb-3">Register</h3>
+  <main class="page-content d-flex align-items-center justify-content-center">
+    <div class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card shadow-sm glass-card">
+            <div class="card-body">
+              <h2 class="text-center mb-2 fw-bold">Create an account</h2>
+              <p class="text-center text-muted mb-3">Join the community — it's quick and free.</p>
+              
 
-            <?php if (!empty($errors)): ?>
-              <div class="alert alert-danger">
-                <ul class="mb-0">
-                  <?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?>
-                </ul>
-              </div>
-            <?php endif; ?>
+              <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger" role="alert" aria-live="assertive">
+                  <ul class="mb-0">
+                    <?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?>
+                  </ul>
+                </div>
+              <?php endif; ?>
 
-            <form method="post" novalidate>
-              <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input name="username" class="form-control" value="<?=htmlspecialchars($old['username'])?>">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input name="email" type="email" class="form-control" value="<?=htmlspecialchars($old['email'])?>">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Full name (optional)</label>
-                <input name="full_name" class="form-control" value="<?=htmlspecialchars($old['full_name'])?>">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input name="password" type="password" class="form-control">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input name="password_confirm" type="password" class="form-control">
-              </div>
-              <div class="d-grid">
-                <button class="btn btn-accent">Register</button>
-              </div>
-            </form>
+              <form method="post" novalidate autocomplete="on">
+                <div class="mb-3">
+                  <label for="username" class="form-label">Username</label>
+                  <input id="username" name="username" class="form-control" value="<?=htmlspecialchars($old['username'])?>" required autofocus autocomplete="username">
+                </div>
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input id="email" name="email" type="email" class="form-control" value="<?=htmlspecialchars($old['email'])?>" required autocomplete="email">
+                </div>
+                <div class="mb-3">
+                  <label for="full_name" class="form-label">Full name (optional)</label>
+                  <input id="full_name" name="full_name" class="form-control" value="<?=htmlspecialchars($old['full_name'])?>" autocomplete="name">
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input id="password" name="password" type="password" class="form-control" minlength="6" required autocomplete="new-password">
+                </div>
+                <div class="mb-3">
+                  <label for="password_confirm" class="form-label">Confirm Password</label>
+                  <input id="password_confirm" name="password_confirm" type="password" class="form-control" minlength="6" required autocomplete="new-password">
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-accent">Register</button>
+                </div>
+              </form>
 
-            <hr>
-            <p class="small mb-0">Already have an account? <a href="login.php">Log in</a></p>
+              <hr>
+              <p class="small mb-0">Already have an account? <a href="login.php">Log in</a></p>
 
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 </body>
 </html>
 

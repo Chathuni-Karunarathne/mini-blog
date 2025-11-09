@@ -8,6 +8,7 @@
   --pink: #f9adaf;
   --bgpink:#fef4ea;
   --cream: #fef4ea;
+  --cream-dark: #f4e0cf; /* slightly deeper beige for buttons */
   --bg-pink: var(--bgpink); /* use the main pink as page background */
   --accent-deep: #c84663; /* deeper pink for contrast */
   --muted-brown: #4b2c2c;
@@ -120,6 +121,11 @@ body {
 .card-title a{ text-decoration:none; color:var(--accent-deep); font-weight:600; }
 .card-title a:hover{ color: #7b2e2e; }
 
+/* Postcard titles should use the brand brown for readability (override pink) */
+.post-card .card-title { position: relative; z-index: 2; }
+.post-card .card-title a { color: rgba(75,44,44,0.98) !important; font-weight:700; text-shadow: 0 1px 0 rgba(255,255,255,0.25); }
+.post-card .card-title a:hover { color: #601f26 !important; }
+
 
 
 
@@ -128,6 +134,32 @@ body {
   position: relative;
   overflow: visible; /* ensures border isn’t cut off */
   border-radius: 16px;
+}
+
+/* Subtle gradient overlay for postcards using the user-selected background color
+   Mix a small amount of the brand accent (#fe91a5) into the user's color and apply
+   ~70% opacity so the site background peeks through. The card content is raised
+   above the overlay for readability. */
+.post-card > .card-img-top,
+.post-card > img{
+  position: relative;
+  z-index: 1;
+}
+
+/* Apply the gradient overlay only to the card body so featured images are not tinted */
+.post-card .card-body{
+  position: relative;
+  z-index: 1; /* ensure content sits above the overlay */
+}
+.post-card .card-body::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0; /* sits under the card body content */
+  background: linear-gradient(180deg, var(--post-bg) 0%, rgba(254,145,165,0.12) 100%);
+  opacity: .6;
 }
 
 /* SVG border outline that floats around the card */
@@ -412,7 +444,8 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 .auth-animated{
   background: linear-gradient(120deg, #fef4ea, #f9adaf, #ffe5ec);
   background-size: 300% 300%;
-  animation: gradientShift 12s ease infinite;
+  /* slowed down per user request */
+  animation: gradientShift 30s ease infinite;
 }
 
 @keyframes gradientShift {
@@ -699,7 +732,7 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 }
 .profile-card .profile-tabs .tab.active{
   /* selected tab uses the brand pink and sits flush with the panel below */
-  background: #f9adaf !important; /* explicit pink to match request */
+  background: #f9adb08a !important; /* explicit pink to match request */
   color: white;
   box-shadow: 0 12px 30px rgba(201,76,99,0.12);
   border-bottom-left-radius: 0 !important;
@@ -711,7 +744,7 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 
 /* Make the panel itself the soft pink box that tabs connect to */
 .profile-card .profile-panels-wrap{
-  background: #f9adaf; /* full pink box as requested */
+  background: #f9adb080; /* full pink box as requested */
   border-radius: 8px;
   padding: 1rem;
   /* remove thin border since box is now solid pink */
@@ -732,5 +765,34 @@ footer p, .small{ color: rgba(75,44,44,0.55); }
 
 /* Ensure active tab visually connects — remove bottom shadow overlap */
 .profile-card .profile-tabs .tab.active{ box-shadow: 0 6px 18px rgba(201,76,99,0.08); }
+
+/* Make edit buttons inside profile panels use the cream brand color */
+.profile-card .btn-warning,
+.profile-card a.btn-warning,
+.profile-card button.btn-warning {
+  background: var(--cream) !important;
+  color: var(--muted-brown) !important;
+  border: 1px solid rgba(75,44,44,0.06) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04) !important;
+}
+.profile-card .btn-warning:hover,
+.profile-card a.btn-warning:hover,
+.profile-card button.btn-warning:hover {
+  filter: brightness(.98);
+  transform: translateY(-1px);
+}
+
+/* Reusable cream button for use across the site */
+.btn-cream{
+  background: var(--cream-dark) !important;
+  color: var(--muted-brown) !important;
+  border: 1px solid rgba(75,44,44,0.06) !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04) !important;
+}
+.btn-cream{
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease, background .12s ease;
+}
+.btn-cream:hover{ filter: brightness(.96); transform: translateY(-1px); background: #e9d3bf; }
+.btn-cream:focus{ outline: none; box-shadow: 0 0 0 6px rgba(249,173,175,0.12); }
 
 

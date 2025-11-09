@@ -34,6 +34,7 @@ $justRegistered = isset($_GET['registered']);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 </head>
 <body class="auth-animated">
   <main class="page-content d-flex align-items-center justify-content-center">
@@ -42,37 +43,38 @@ $justRegistered = isset($_GET['registered']);
         <div class="col-md-5">
           <div class="card shadow-sm glass-card">
             <div class="card-body">
-            <b><h2 class="text-center mb-4">Hello Again!</h2></b>
-            <h3 class="card-title mb-3">Login</h3>
+              <h2 class="text-center mb-2 fw-bold">Hello again</h2>
+              <p class="text-center text-muted mb-3">Welcome back — sign in to continue.</p>
+          
 
-            <?php if ($justRegistered): ?>
-              <div class="alert alert-success">Registration successful! Please log in.</div>
-            <?php endif; ?>
+              <?php if ($justRegistered): ?>
+                <div class="alert alert-success" role="status">Registration successful! Please log in.</div>
+              <?php endif; ?>
 
-            <?php if (!empty($errors)): ?>
-              <div class="alert alert-danger">
-                <ul class="mb-0">
-                  <?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?>
-                </ul>
-              </div>
-            <?php endif; ?>
+              <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger" role="alert" aria-live="assertive">
+                  <ul class="mb-0">
+                    <?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?>
+                  </ul>
+                </div>
+              <?php endif; ?>
 
-            <form method="post">
-              <div class="mb-3">
-                <label class="form-label">Username or Email</label>
-                <input name="username_or_email" class="form-control">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input name="password" type="password" class="form-control">
-              </div>
-              <div class="d-grid">
-                <button class="btn btn-accent">Login</button>
-              </div>
-            </form>
+              <form method="post" autocomplete="on">
+                <div class="mb-3">
+                  <label for="username_or_email" class="form-label">Username or Email</label>
+                  <input id="username_or_email" name="username_or_email" class="form-control" value="<?=htmlspecialchars($_POST['username_or_email'] ?? '')?>" required autofocus autocomplete="username">
+                </div>
+                <div class="mb-3">
+                  <label for="password" class="form-label">Password</label>
+                  <input id="password" name="password" type="password" class="form-control" required autocomplete="current-password">
+                </div>
+                <div class="d-grid">
+                  <button type="submit" class="btn btn-accent">Login</button>
+                </div>
+              </form>
 
-            <hr>
-            <p class="small mb-0">Don't have an account? <a href="register.php">Register</a></p>
+              <hr>
+              <p class="small mb-0">Don't have an account? <a href="register.php">Register</a></p>
 
             </div>
           </div>

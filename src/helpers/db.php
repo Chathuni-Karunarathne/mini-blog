@@ -1,20 +1,24 @@
 <?php
 // src/helpers/db.php
-// Establishes and returns a connection to the MySQL database for all database operations
-$config = require __DIR__ . '/../../config.php';
-$db = $config->db;
+require_once __DIR__ . '/env.php';
 
-$dsn = "mysql:host={$db->host};port={$db->port};dbname={$db->name};charset={$db->charset}";
-$options = [
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
+$host = getenv('DB_HOST') ?: '127.0.0.1';
+$port = getenv('DB_PORT') ?: '3306';
+$name = getenv('DB_NAME') ?: 'mini_blog';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: '';
+
+$charset = 'utf8mb4';
+$dsn = "mysql:host=$host;port=$port;dbname=$name;charset=$charset";
 
 try {
-    $pdo = new PDO($dsn, $db->user, $db->pass, $options);
+    $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+    return $pdo;
 } catch (PDOException $e) {
+    // show useful message in dev; in production consider logging instead
     die("Database Connection failed: " . $e->getMessage());
 }
 
-
-return $pdo;  

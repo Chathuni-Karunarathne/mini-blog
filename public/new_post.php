@@ -29,7 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $status = ($action === 'publish') ? 'published' : 'draft';
 
 
-    $old = ['title'=>$title, 'excerpt'=>$excerpt, 'content'=>$content, 'status'=>$status];
+  $bg_color = $_POST['bg_color'] ?? '#ffffff';
+
+  $old = ['title'=>$title, 'excerpt'=>$excerpt, 'content'=>$content, 'status'=>$status, 'bg_color'=>$bg_color];
 
     if ($title === '' || strlen($title) < 3) {
         $errors[] = "Please provide a title (min 3 characters).";
@@ -104,7 +106,7 @@ $stmt->execute([
 <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
 <link rel="stylesheet" href="/mini-blog/public/assets/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&display=swap" rel="stylesheet">
-
+  <link rel="icon" type="image/x-icon" href="/mini-blog/favicon.ICO">
 
 </head>
 <body class="bg-light">
@@ -115,22 +117,21 @@ $stmt->execute([
   &#8592;
 </a>
 
-  <h2 class="text-center mb-4">New Post</h2>
 
   <!-- ✅ Glass Box Wrapper -->
   <div class="glass-box mx-auto mt-4 p-4 shadow-lg" style="max-width: 800px;">
     
     <?php if (!empty($errors)): ?>
-      <div class="alert alert-danger">
+      <div class="alert alert-danger" role="alert" aria-live="assertive">
         <ul><?php foreach ($errors as $e): ?><li><?=htmlspecialchars($e)?></li><?php endforeach; ?></ul>
       </div>
     <?php endif; ?>
 
     <!-- ✅ Single Form (keep everything inside this one) -->
-    <form method="post" enctype="multipart/form-data">
+  <form id="post-form" method="post" enctype="multipart/form-data" autocomplete="on">
       <div class="mb-3">
-        <label class="form-label">Title</label>
-        <input name="title" class="form-control" value="<?=htmlspecialchars($old['title'] ?? '')?>">
+        <label for="title" class="form-label">Title</label>
+        <input id="title" name="title" class="form-control" value="<?=htmlspecialchars($old['title'] ?? '')?>" required autofocus>
       </div>
 
       <div class="mb-3">
@@ -140,13 +141,13 @@ $stmt->execute([
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Content</label>
-        <textarea id="content-editor" name="content" rows="10" class="form-control"><?=htmlspecialchars($old['content'] ?? '')?></textarea>
+        <label for="content-editor" class="form-label">Content</label>
+        <textarea id="content-editor" name="content" rows="10" class="form-control" required><?=htmlspecialchars($old['content'] ?? '')?></textarea>
       </div>
 
       <div class="mb-3">
-        <label class="form-label">Featured Image (optional, max 2MB)</label>
-        <input type="file" name="featured_image" class="form-control" accept="image/*">
+        <label for="featured_image" class="form-label">Featured Image (optional, max 2MB)</label>
+        <input id="featured_image" type="file" name="featured_image" class="form-control" accept="image/*">
       </div>
 
       <!-- 🎨 Background Color Picker -->
@@ -154,7 +155,7 @@ $stmt->execute([
         <label class="form-label d-block">Background Color</label>
         <div class="d-flex flex-wrap gap-2">
           <?php
-          $colors = ['#fdf0f5', '#fadce9', '#f6bfd3', '#f19fb9', '#ea7ea3', '#f7d7db', '#fbe9df', '#f0e3d3'];
+          $colors = ['#FCEDF0', '#FDE2E7', '#FDD7DE', '#FECBD4', '#FEC0CB', '#FFB5C2', '#fbe9df', '#f0e3d3'];
           foreach ($colors as $c):
           ?>
             <span 
@@ -168,9 +169,21 @@ $stmt->execute([
         <div class="form-text">Click a color circle to choose your background.</div>
       </div>
 
+      <script>
+      // wire color-circle clicks to set the hidden bg_color input (same behavior as edit_post)
+      document.querySelectorAll('.color-circle').forEach(circle => {
+        circle.addEventListener('click', () => {
+          document.querySelectorAll('.color-circle').forEach(c => c.style.border = '2px solid #ccc');
+          circle.style.border = '2px solid #007bff';
+          const input = document.getElementById('bg_color');
+          if (input) input.value = circle.dataset.color;
+        });
+      });
+      </script>
+
       <div class="d-flex gap-2">
-        <button type="submit" name="action" value="draft" class="btn btn-secondary">Save as Draft</button>
-        <button type="submit" name="action" value="publish" class="btn btn-primary">Publish</button>
+        <button type="submit" name="action" value="draft" class="btn btn-cream" onclick="syncEditor && syncEditor()">Save as Draft</button>
+        <button type="submit" name="action" value="publish" class="btn btn-primary" onclick="syncEditor && syncEditor()">Publish</button>
       </div>
     </form>
   </div> <!-- glass-box end -->
@@ -200,6 +213,46 @@ document.addEventListener("DOMContentLoaded", function() {
       codeSyntaxHighlighting: true
     }
   });
+  
+  // Ensure editor content is synced to the textarea before form submit
+  try {
+    // pick the form explicitly (multipart form)
+    const form = document.querySelector('form[method="post"][enctype="multipart/form-data"]') || document.querySelector('form[method="post"]');
+    if (form) {
+      // attach submit handler
+      form.addEventListener('submit', function (e) {
+        try {
+          // If EasyMDE exposes codemirror, call save() to sync to textarea
+          if (easyMDE && easyMDE.codemirror && typeof easyMDE.codemirror.save === 'function') {
+            easyMDE.codemirror.save();
+          }
+          // Fallback: set textarea value from easyMDE.value()
+          const ta = document.getElementById('content-editor');
+          if (ta) {
+            if (typeof easyMDE.value === 'function') ta.value = easyMDE.value();
+            // log length for debugging
+            if (window.console && console.log) console.log('Submitting form: content length', (ta.value || '').length);
+          }
+        } catch (innerErr) {
+          console.warn('Error syncing EasyMDE content before submit', innerErr);
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('EasyMDE sync handler error', err);
+  }
+  // expose a global sync function for onclick fallbacks
+  window.syncEditor = function () {
+    try {
+      if (easyMDE && easyMDE.codemirror && typeof easyMDE.codemirror.save === 'function') {
+        easyMDE.codemirror.save();
+      }
+      const ta = document.getElementById('content-editor');
+      if (ta && typeof easyMDE.value === 'function') ta.value = easyMDE.value();
+    } catch (e) {
+      console.warn('syncEditor error', e);
+    }
+  };
 });
 </script>
 
