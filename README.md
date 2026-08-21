@@ -43,5 +43,5 @@ A minimal blog application built with plain PHP, PDO (MySQL), and Bootstrap for 
 4. Briefly explain security decisions (password hashing, prepared statements, CSRF, Markdown escape).
 
 ## Author
-Your Name — Student ID (if required)
+Chathuni Karunarathne
 
